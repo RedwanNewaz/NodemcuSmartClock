@@ -6,9 +6,6 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        example: [src/main.cpp, include/smart_clock.h, include/button_clock.h, include/wifi_manager.h]
 
     steps:
     - uses: actions/checkout@v2
@@ -17,7 +14,8 @@ jobs:
       with:
         path: ~/.cache/pip
         key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-        restore-keys: ${{ runner.os }}-pip-
+        restore-keys: |
+          ${{ runner.os }}-pip-
     - name: Cache PlatformIO
       uses: actions/cache@v2
       with:
@@ -30,6 +28,4 @@ jobs:
         python -m pip install --upgrade pip
         pip install --upgrade platformio
     - name: Run PlatformIO
-      run: pio ci --board=nodemcu"
-      env:
-        PLATFORMIO_CI_SRC: ${{ matrix.example }}
+      run: pio run -e src/main.cpp
