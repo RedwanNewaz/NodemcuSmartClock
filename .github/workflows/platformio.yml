@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        example: [src/main.cpp]
+        example: [src/main.cpp, include/smart_clock.h, include/button_clock.h, include/wifi_manager.h]
 
     steps:
     - uses: actions/checkout@v2
@@ -30,6 +30,6 @@ jobs:
         python -m pip install --upgrade pip
         pip install --upgrade platformio
     - name: Run PlatformIO
-      run: pio ci --board=nodemcu --lib="./include"
+      run: pio ci --board=nodemcu"
       env:
         PLATFORMIO_CI_SRC: ${{ matrix.example }}
