@@ -77,10 +77,10 @@ namespace WifiManager{
             for (byte i = 0; i < len; i++)
             tempLon += eRead[i];
 
-            Serial.print("lat: \t\t"); Serial.println(tempTZ);
-            Serial.print("long: \t\t"); Serial.println(tempLat);
-            Serial.print("tz: \t\t"); Serial.println(tempLon);
-            Serial.println("+++++++EEPROM++++++++");
+            // Serial.print("lat: \t\t"); Serial.println(tempTZ);
+            // Serial.print("long: \t\t"); Serial.println(tempLat);
+            // Serial.print("tz: \t\t"); Serial.println(tempLon);
+            // Serial.println("+++++++EEPROM++++++++");
 
             return{tempTZ.toInt(), tempLat.toDouble(), tempLon.toDouble()};
         }
@@ -105,7 +105,7 @@ namespace WifiManager{
             {
                 Serial.println("\n\tConnecting to Wi-Fi");
                 x = ReadByte(EEPROM_SSID_LEN);
-                Serial.print("\t\tValue of byte at adress 2 ="); Serial.println(x);
+                // Serial.print("\t\tValue of byte at adress 2 ="); Serial.println(x);
                 ReadString(EEPROM_SSID_STR, x);
                 tempS = "";
                 for (byte i = 0; i < len; i++)

@@ -117,10 +117,10 @@ class PrayerTimes
     {
       latitude = _latitude;
       longitude = _longitude;
-      timezone = _timezone;
-      if (_dst_on) {
-        timezone+=1;
-      }
+      timezone = _timezone + _dst_on;
+      // if (_dst_on) {
+      //   timezone+=1; // FIXME changed from +1 -> -1
+      // }
 
       // Fix calculation method
       if (_calc_method.equalsIgnoreCase("ISNA")) {

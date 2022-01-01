@@ -3,6 +3,7 @@
 #include <NTPClient.h>
 #include "button_clock.h"
 #include "azan_clock.h"
+#include "music_clock.h"
 
 class SmartClock: public NTPClient{
 public:
@@ -54,6 +55,7 @@ public:
     {
         Serial.println("updating minute clock");
         // this will perform software update 
+        // azan_.update_clock(currentYear_, currentMonth_, currentDay_);
         ++currentMinute_;
         --prayerAlarm_;
         if(currentMinute_ >= 60)
@@ -63,10 +65,12 @@ public:
         }
 
         // check prayer alarm 
-        if(prayerAlarm_ <= 0)
+        if(prayerAlarm_ == 0)
         {
             Serial.println("Azan time");
             prayerAlarm_ = azan_.next_prayer_in_minutes(getCurrentTimeInMinutes());
+           
+            
         }
         else
         {
@@ -75,9 +79,14 @@ public:
             Serial.println(" minutes");
         }
 
-        // every day sync clock at 12:01 AM
-        if(currentHour_ == 0 && currentMinute_ == 1)
+        // every day sync clock at 12:00 AM
+        if(currentHour_ == 23 && currentMinute_ == 59)
             reset_clock();
+    }
+
+    int next_prayer()
+    {
+        return prayerAlarm_;
     }
 private:
     ButtonClock::Clock bcc_;
@@ -85,6 +94,7 @@ private:
     volatile int currentHour_, currentMinute_, currentSecond_; 
     volatile int currentDay_, currentMonth_, currentYear_; 
     volatile int prayerAlarm_; 
+
 
 
 protected:

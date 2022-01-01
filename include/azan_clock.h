@@ -14,7 +14,7 @@ public:
         //TODO read this information from eeprom 
         latitude = _latitude;
         longitude = _longitude;
-        timezone = _timezone;
+        original_tz_ = _timezone;
     }
     template<typename T>
     void set_location(const T &stat)
@@ -33,10 +33,10 @@ public:
         String my_calc_method = "ISNA";
         String my_asr_method = "Shafii";
         String my_high_lats_method = "None";
-        bool my_dst_on = false; 
+        bool my_dst_on = true; 
         double my_prayer_times[TimesCount];
         
-        get_prayer_times(year, month, day, latitude , longitude , timezone , my_dst_on, my_calc_method, my_asr_method, my_high_lats_method, my_prayer_times );
+        get_prayer_times(year, month, day, latitude , longitude , original_tz_ , my_dst_on, my_calc_method, my_asr_method, my_high_lats_method, my_prayer_times );
 
         int hours, minutes;
         int count = 0; 
@@ -85,7 +85,7 @@ public:
             }
         }
 
-        return 0;
+        return daily_prayer_times_[0] - currentTimeInMin + 24 * 60;
         
 
     }
@@ -93,6 +93,7 @@ public:
 private:
     int daily_prayer_times_[NUM_DAILY_PRAYERS];
     String daily_prayer_names_[NUM_DAILY_PRAYERS];
+    int original_tz_;
     
     
 
