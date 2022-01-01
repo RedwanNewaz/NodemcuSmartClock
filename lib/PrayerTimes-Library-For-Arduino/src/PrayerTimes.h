@@ -1,5 +1,6 @@
 #include <Arduino.h>
-#define M_PI 3.1416
+#include <math.h>
+
 // #include <String.h>
 /*-------------------------- In the name of God ----------------------------*\
 
@@ -94,7 +95,7 @@ class PrayerTimes
     PrayerTimes(CalculationMethod calc_method = Jafari,
                 JuristicMethod asr_juristic = Shafii,
                 AdjustingMethod adjust_high_lats = None,
-                double dhuhr_minutes = 0)
+                float dhuhr_minutes = 0)
       : calc_method(calc_method)
       , asr_juristic(asr_juristic)
       , adjust_high_lats(adjust_high_lats)
@@ -113,7 +114,7 @@ class PrayerTimes
 
 
     /* return prayer times for a given date */
-    void get_prayer_times(int year, int month, int day, double _latitude, double _longitude, double _timezone, bool _dst_on, String _calc_method, String _asr_method, String _my_high_lats_method, double times[])
+    void get_prayer_times(int year, int month, int day, float _latitude, float _longitude, float _timezone, bool _dst_on, String _calc_method, String _asr_method, String _my_high_lats_method, float times[])
     {
       latitude = _latitude;
       longitude = _longitude;
@@ -158,7 +159,7 @@ class PrayerTimes
       }
 
       
-      julian_date = get_julian_date(year, month, day) - longitude / (double) (15 * 24);
+      julian_date = get_julian_date(year, month, day) - longitude / (float) (15 * 24);
       compute_day_times(times);
     }
 
@@ -182,14 +183,14 @@ class PrayerTimes
     }
 
     /* set the angle for calculating Fajr */
-    void set_fajr_angle(double angle)
+    void set_fajr_angle(float angle)
     {
       method_params[Custom].fajr_angle = angle;
       calc_method = Custom;
     }
 
     /* set the angle for calculating Maghrib */
-    void set_maghrib_angle(double angle)
+    void set_maghrib_angle(float angle)
     {
       method_params[Custom].maghrib_is_minutes = false;
       method_params[Custom].maghrib_value = angle;
@@ -197,7 +198,7 @@ class PrayerTimes
     }
 
     /* set the angle for calculating Isha */
-    void set_isha_angle(double angle)
+    void set_isha_angle(float angle)
     {
       method_params[Custom].isha_is_minutes = false;
       method_params[Custom].isha_value = angle;
@@ -205,13 +206,13 @@ class PrayerTimes
     }
 
     /* set the minutes after mid-day for calculating Dhuhr */
-    void set_dhuhr_minutes(double minutes)
+    void set_dhuhr_minutes(float minutes)
     {
       dhuhr_minutes = minutes;
     }
 
     /* set the minutes after Sunset for calculating Maghrib */
-    void set_maghrib_minutes(double minutes)
+    void set_maghrib_minutes(float minutes)
     {
       method_params[Custom].maghrib_is_minutes = true;
       method_params[Custom].maghrib_value = minutes;
@@ -219,7 +220,7 @@ class PrayerTimes
     }
 
     /* set the minutes after Maghrib for calculating Isha */
-    void set_isha_minutes(double minutes)
+    void set_isha_minutes(float minutes)
     {
       method_params[Custom].isha_is_minutes = true;
       method_params[Custom].isha_value = minutes;
@@ -234,7 +235,7 @@ class PrayerTimes
     }
 
     /* get hours and minutes parts of a float time */
-    static void get_float_time_parts(double time, int& hours, int& minutes)
+    static void get_float_time_parts(float time, int& hours, int& minutes)
     {
       time = fix_hour(time + 0.5 / 60);   // add 0.5 minutes to round
       hours = floor(time);
@@ -243,7 +244,7 @@ class PrayerTimes
 
     /* convert float hours to 24h format */
 
-    static String float_time_to_time24(double time)
+    static String float_time_to_time24(float time)
     {
       // if (isnan(time))
       // return String;
@@ -256,7 +257,7 @@ class PrayerTimes
     /* convert float hours to 12h format */
     /* with AM or PM suffix */
 
-    static String float_time_to_time12(double time, bool no_suffix = false)
+    static String float_time_to_time12(float time, bool no_suffix = false)
     {
       //if (isnan(time))
       //return std::string();
@@ -271,7 +272,7 @@ class PrayerTimes
     /* convert float hours to 12h format with no suffix */
     /* without AM or PM suffix */
 
-    static String float_time_to_time12ns(double time)
+    static String float_time_to_time12ns(float time)
     {
       return float_time_to_time12(time, true);
     }
@@ -313,11 +314,11 @@ class PrayerTimes
       {
       }
 
-      MethodConfig(double fajr_angle,
+      MethodConfig(float fajr_angle,
                    bool maghrib_is_minutes,
-                   double maghrib_value,
+                   float maghrib_value,
                    bool isha_is_minutes,
-                   double isha_value)
+                   float isha_value)
         : fajr_angle(fajr_angle)
         , maghrib_is_minutes(maghrib_is_minutes)
         , maghrib_value(maghrib_value)
@@ -326,11 +327,11 @@ class PrayerTimes
       {
       }
 
-      double fajr_angle;
+      float fajr_angle;
       bool   maghrib_is_minutes;
-      double maghrib_value;   // angle or minutes
+      float maghrib_value;   // angle or minutes
       bool   isha_is_minutes;
-      double isha_value;    // angle or minutes
+      float isha_value;    // angle or minutes
     };
 
     /* ---------------------- Calculation Functions ----------------------- */
@@ -339,68 +340,68 @@ class PrayerTimes
     /* http://www.ummah.net/astronomy/saltime   */
     /* http://aa.usno.navy.mil/faq/docs/SunApprox.html */
 
-    // typedef std::pair<double, double> DoublePair;
+    // typedef std::pair<float, float> floatPair;
 
     /* compute declination angle of sun and equation of time */
-    void sun_position(double jd, double &a , double &b)
+    void sun_position(float jd, float &a , float &b)
     {
-      double d = jd - 2451545.0;
-      double g = fix_angle(357.529 + 0.98560028 * d);
-      double q = fix_angle(280.459 + 0.98564736 * d);
-      double l = fix_angle(q + 1.915 * dsin(g) + 0.020 * dsin(2 * g));
+      float d = jd - 2451545.0;
+      float g = fix_angle(357.529 + 0.98560028 * d);
+      float q = fix_angle(280.459 + 0.98564736 * d);
+      float l = fix_angle(q + 1.915 * dsin(g) + 0.020 * dsin(2 * g));
 
-      // double r = 1.00014 - 0.01671 * dcos(g) - 0.00014 * dcos(2 * g);
-      double e = 23.439 - 0.00000036 * d;
+      // float r = 1.00014 - 0.01671 * dcos(g) - 0.00014 * dcos(2 * g);
+      float e = 23.439 - 0.00000036 * d;
 
-      double dd = darcsin(dsin(e) * dsin(l));
-      double ra = darctan2(dcos(e) * dsin(l), dcos(l)) / 15.0;
+      float dd = darcsin(dsin(e) * dsin(l));
+      float ra = darctan2(dcos(e) * dsin(l), dcos(l)) / 15.0;
       ra = fix_hour(ra);
-      double eq_t = q / 15.0 - ra;
+      float eq_t = q / 15.0 - ra;
       a = dd ;
       b = eq_t;
 
       
-      // return DoublePair(dd, eq_t);
+      // return floatPair(dd, eq_t);
     }
 
     /* compute equation of time */
-    double equation_of_time(double jd)
+    float equation_of_time(float jd)
     {
-      double a , b;
+      float a , b;
       sun_position (jd, a , b);
       return b;
     }
 
     /* compute declination angle of sun */
-    double sun_declination(double jd)
+    float sun_declination(float jd)
     {
-        double a , b;
+        float a , b;
         sun_position (jd, a , b);
         return a;
     }
 
     /* compute mid-day (Dhuhr, Zawal) time */
-    double compute_mid_day(double _t)
+    float compute_mid_day(float _t)
     {
-      double t = equation_of_time(julian_date + _t);
-      double z = fix_hour(12 - t);
+      float t = equation_of_time(julian_date + _t);
+      float z = fix_hour(12 - t);
       return z;
     }
 
     /* compute time for a given angle G */
-    double compute_time(double g, double t)
+    float compute_time(float g, float t)
     {
-      double d = sun_declination(julian_date + t);
-      double z = compute_mid_day(t);
-      double v = 1.0 / 15.0 * darccos((-dsin(g) - dsin(d) * dsin(latitude)) / (dcos(d) * dcos(latitude)));
+      float d = sun_declination(julian_date + t);
+      float z = compute_mid_day(t);
+      float v = 1.0 / 15.0 * darccos((-dsin(g) - dsin(d) * dsin(latitude)) / (dcos(d) * dcos(latitude)));
       return z + (g > 90.0 ? - v :  v);
     }
 
     /* compute the time of Asr */
-    double compute_asr(int step, double t)  // Shafii: step=1, Hanafi: step=2
+    float compute_asr(int step, float t)  // Shafii: step=1, Hanafi: step=2
     {
-      double d = sun_declination(julian_date + t);
-      double g = -darccot(step + dtan(fabs(latitude - d)));
+      float d = sun_declination(julian_date + t);
+      float g = -darccot(step + dtan(fabs(latitude - d)));
       return compute_time(g, t);
     }
 
@@ -409,7 +410,7 @@ class PrayerTimes
     // array parameters must be at least of size TimesCount
 
     /* compute prayer times at given julian date */
-    void compute_times(double times[])
+    void compute_times(float times[])
     {
       day_portion(times);
 
@@ -424,9 +425,9 @@ class PrayerTimes
 
 
     /* compute prayer times at given julian date */
-    void compute_day_times(double times[])
+    void compute_day_times(float times[])
     {
-      double default_times[] = { 5, 6, 12, 13, 18, 18, 18 };    // default times
+      float default_times[] = { 5, 6, 12, 13, 18, 18, 18 };    // default times
       for (int i = 0; i < TimesCount; ++i)
         times[i] = default_times[i];
 
@@ -438,7 +439,7 @@ class PrayerTimes
 
 
     /* adjust times in a prayer time array */
-    void adjust_times(double times[])
+    void adjust_times(float times[])
     {
       for (int i = 0; i < TimesCount; ++i)
         times[i] += timezone - longitude / 15.0;
@@ -453,31 +454,31 @@ class PrayerTimes
     }
 
     /* adjust Fajr, Isha and Maghrib for locations in higher latitudes */
-    void adjust_high_lat_times(double times[])
+    void adjust_high_lat_times(float times[])
     {
-      double night_time = time_diff(times[Sunset], times[Sunrise]);   // sunset to sunrise
+      float night_time = time_diff(times[Sunset], times[Sunrise]);   // sunset to sunrise
 
       // Adjust Fajr
-      double fajr_diff = night_portion(method_params[calc_method].fajr_angle) * night_time;
+      float fajr_diff = night_portion(method_params[calc_method].fajr_angle) * night_time;
       if (isnan(times[Fajr]) || time_diff(times[Fajr], times[Sunrise]) > fajr_diff)
         times[Fajr] = times[Sunrise] - fajr_diff;
 
       // Adjust Isha
-      double isha_angle = method_params[calc_method].isha_is_minutes ? 18.0 : method_params[calc_method].isha_value;
-      double isha_diff = night_portion(isha_angle) * night_time;
+      float isha_angle = method_params[calc_method].isha_is_minutes ? 18.0 : method_params[calc_method].isha_value;
+      float isha_diff = night_portion(isha_angle) * night_time;
       if (isnan(times[Isha]) || time_diff(times[Sunset], times[Isha]) > isha_diff)
         times[Isha] = times[Sunset] + isha_diff;
 
       // Adjust Maghrib
-      double maghrib_angle = method_params[calc_method].maghrib_is_minutes ? 4.0 : method_params[calc_method].maghrib_value;
-      double maghrib_diff = night_portion(maghrib_angle) * night_time;
+      float maghrib_angle = method_params[calc_method].maghrib_is_minutes ? 4.0 : method_params[calc_method].maghrib_value;
+      float maghrib_diff = night_portion(maghrib_angle) * night_time;
       if (isnan(times[Maghrib]) || time_diff(times[Sunset], times[Maghrib]) > maghrib_diff)
         times[Maghrib] = times[Sunset] + maghrib_diff;
     }
 
 
     /* the night portion used for adjusting times in higher latitudes */
-    double night_portion(double angle)
+    float night_portion(float angle)
     {
       switch (adjust_high_lats)
       {
@@ -497,7 +498,7 @@ class PrayerTimes
     }
 
     /* convert hours to day portions  */
-    void day_portion(double times[])
+    void day_portion(float times[])
     {
       for (int i = 0; i < TimesCount; ++i)
         times[i] /= 24.0;
@@ -506,7 +507,7 @@ class PrayerTimes
     /* ---------------------- Misc Functions ----------------------- */
 
     /* compute the difference between two times  */
-    static double time_diff(double time1, double time2)
+    static float time_diff(float time1, float time2)
     {
       return fix_hour(time2 - time1);
     }
@@ -539,7 +540,7 @@ class PrayerTimes
     /* ---------------------- Julian Date Functions ----------------------- */
 
     /* calculate julian date from a calendar date */
-    double get_julian_date(int year, int month, int day)
+    float get_julian_date(int year, int month, int day)
     {
       if (month <= 2)
       {
@@ -547,8 +548,8 @@ class PrayerTimes
         month += 12;
       }
 
-      double a = floor(year / 100.0);
-      double b = 2 - a + floor(a / 4.0);
+      float a = floor(year / 100.0);
+      float b = 2 - a + floor(a / 4.0);
 
       return floor(365.25 * (year + 4716)) + floor(30.6001 * (month + 1)) + day + b - 1524.5;
     }
@@ -557,67 +558,67 @@ class PrayerTimes
     /* ---------------------- Trigonometric Functions ----------------------- */
 
     /* degree sin */
-    static double dsin(double d)
+    static float dsin(float d)
     {
       return sin(deg2rad(d));
     }
 
     /* degree cos */
-    static double dcos(double d)
+    static float dcos(float d)
     {
       return cos(deg2rad(d));
     }
 
     /* degree tan */
-    static double dtan(double d)
+    static float dtan(float d)
     {
       return tan(deg2rad(d));
     }
 
     /* degree arcsin */
-    static double darcsin(double x)
+    static float darcsin(float x)
     {
       return rad2deg(asin(x));
     }
 
     /* degree arccos */
-    static double darccos(double x)
+    static float darccos(float x)
     {
       return rad2deg(acos(x));
     }
 
     /* degree arctan */
-    static double darctan(double x)
+    static float darctan(float x)
     {
       return rad2deg(atan(x));
     }
 
     /* degree arctan2 */
-    static double darctan2(double y, double x)
+    static float darctan2(float y, float x)
     {
       return rad2deg(atan2(y, x));
     }
 
     /* degree arccot */
-    static double darccot(double x)
+    static float darccot(float x)
     {
       return rad2deg(atan(1.0 / x));
     }
 
     /* degree to radian */
-    static double deg2rad(double d)
+    static float deg2rad(float d)
     {
       return d * M_PI / 180.0;
     }
 
     /* radian to degree */
-    static double rad2deg(double r)
+    static float rad2deg(float r)
     {
       return r * 180.0 / M_PI;
     }
 
     /* range reduce angle in degrees. */
-    static double fix_angle(double a)
+    static float fix_angle(float a)
     {
       a = a - 360.0 * floor(a / 360.0);
       a = a < 0.0 ? a + 360.0 : a;
@@ -625,7 +626,7 @@ class PrayerTimes
     }
 
     /* range reduce hours to 0..23 */
-    static double fix_hour(double a)
+    static float fix_hour(float a)
     {
       a = a - 24.0 * floor(a / 24.0);
       a = a < 0.0 ? a + 24.0 : a;
@@ -640,18 +641,18 @@ class PrayerTimes
     CalculationMethod calc_method;    // caculation method
     JuristicMethod asr_juristic;    // Juristic method for Asr
     AdjustingMethod adjust_high_lats; // adjusting method for higher latitudes
-    double dhuhr_minutes;   // minutes after mid-day for Dhuhr
+    float dhuhr_minutes;   // minutes after mid-day for Dhuhr
 
 
-    double julian_date;
+    float julian_date;
 
     /* --------------------- Technical Settings -------------------- */
 
     static const int NUM_ITERATIONS = 1;    // number of iterations needed to compute times
 
   protected:
-    double latitude;
-    double longitude;
-    double timezone;
+    float latitude;
+    float longitude;
+    float timezone;
 };
 
