@@ -4,6 +4,7 @@
 #include <EEPROM.h>
 #include <arduino-timer.h>
 
+
 #include "smart_clock.h"
 #include "wifi_manager.h"
 #include "azan_clock.h"
@@ -15,16 +16,19 @@
 #define HOUR_PIN    (D3)
 #define POWER_PIN   (D0)
 
-// WifiManager::Location loc{my_timezone, my_latitude, my_longitude};
 
 WifiManager::Manager manager; 
 WiFiUDP ntpUDP;
 ButtonClock::Clock clock_button(POWER_PIN, RESET_PIN, HOUR_PIN, MINIUTE_PIN);
 
+// azan clock keep tracks of prayer time based on current date and time 
 AzanClock azan_clock;
+// music clock play azan sound when it is triggered by azan clock 
 MusicClock wav;
+// smart clock runs every thing and also maintains time synchronization with the ntp server and azan server 
 SmartClock smart_clock(ntpUDP, "pool.ntp.org", clock_button, azan_clock);
 
+// timer is useful for creating a software clock but it needs synchronization with the ntp clock  
 Timer<3, micros> timer;
 bool initialize_smart_clock(void *argument);
 bool update_smart_clock(void *argument);
@@ -34,10 +38,10 @@ bool repeat_azan_clock(void *argument);
 
 
 void setup() {
-  // put your setup code here, to run once:
+  // start serial for debugging purpose only
   Serial.begin(115200);
   delay(1000);
-
+  // Connecting to Wi-Fi with credential   
   // save personal information to EEPROM 
   // manager.write_credential("your ssid", "your password")
   // manager.write_location("your_tz", "your_lat", "your_lon"); 
@@ -50,39 +54,39 @@ void setup() {
     delay(500);
     Serial.print(".");
   }
-
-
-  // wav->begin();
-   // Connect to Wi-Fi  
   timer.in(5e6, initialize_smart_clock);  
   timer.in(3e7, repeat_azan_clock); 
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  // run timer tick repeatedly to make timer operationalize 
   timer.tick();
+  // azan wav won't works anywhere but inside the loop 
+  // it needs to be initiated using a timer callback 
   if (wav.isRunning()) {
     if (!wav.loop()) wav.stop();
   }
 }
 
 // -------------- Functions for timer --------------
+/*@brief this function will initialize the smart clock once after getting connected with the wifi \par
+* initialization process invokes the button clock to setup the current time from ntp server  
+* it will also create a timer for updating smart clock internal time in every minute  \par
+*/
 bool initialize_smart_clock(void *argument)
 {
-  Serial.println("Resetting clock ");
-  auto loc = manager.get_location();
-  azan_clock.set_location(loc);
-
-  smart_clock.setTimeOffset(loc.timezone * 3600);
+  Serial.println("\n[Main::init] initializing smart clock ");
+  smart_clock.setTimeOffset(manager.get_timezone() * 3600);
   smart_clock.reset_clock();
   timer.every(6e7, update_smart_clock);
-  Serial.print("Timer pending Task "); Serial.println(timer.size());
+  Serial.print("[Main::init] Timer pending Task "); Serial.println(timer.size());
   // timer.every(2e6, update_2s_clock); // debuging purposes 
-
-
   return false;
 }
 
+/*@brief smart clock maintains internal clock counter to update next prayer time \par 
+* smart clock get synchronized with the ntp server @ 12:00 AM every day  
+*/
 bool update_smart_clock(void *argument)
 {
   smart_clock.update_clock();
@@ -91,19 +95,24 @@ bool update_smart_clock(void *argument)
 
 bool update_2s_clock(void *argument)
 {
-  Serial.println("updating 2 sec clock");
+  Serial.println("[Main::debug] updating 2 sec clock");
   return true;
 }
 
-
+/*@brief this function will play the azan music during prayer time \par 
+* when the system get initialized for the first time, azan will be played as well \par 
+* it creates a timer task for repeating azan based on the next prayer time \par
+* azan wav needs to load every time 
+*/
 bool repeat_azan_clock(void *argument)
 {
-  Serial.print("Azan will be repeated in ");
+  
   auto wait_time = smart_clock.next_prayer() * 60 * 1e6;
   // auto wait_time = 1 * 60 * 1e6;
   timer.in(wait_time, repeat_azan_clock); 
   wav.begin();
+  Serial.print("[Main::timer] Azan will be repeated in ");
   Serial.println(wait_time);
-  Serial.print("Timer pending Task "); Serial.println(timer.size());
+  Serial.print("[Main::timer] Timer pending Task "); Serial.println(timer.size());
   return false;
 }

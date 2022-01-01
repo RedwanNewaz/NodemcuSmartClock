@@ -58,7 +58,8 @@ namespace ButtonClock{
       Button minute("minute", minute_pin_, num_minute, debounce_time_, false);
       Button finish("finish", reset_pin_, 1, debounce_time_, false);
       
-      // execute buttons 
+      // execute buttons
+      Serial.println("[ButtonClock]: setting up clock time by simulating buttons"); 
       power.execute();
       memory.execute();
       hour.execute();

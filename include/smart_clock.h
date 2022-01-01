@@ -15,10 +15,10 @@ public:
 
     void reset_clock()
     {
-        Serial.println(" \n \t\t Updating clock ...");
+        Serial.println(" \n \t\t [SmartClock] Updating clock ...");
         update();
         String formattedTime = getFormattedTime();
-        Serial.print("Formatted Time: ");
+        Serial.print("[SmartClock] Formatted Time: ");
         Serial.println(formattedTime);  
 
         currentHour_ = getHours();
@@ -38,14 +38,14 @@ public:
         
        
 
-        Serial.print("*******  Calander date : ");
+        Serial.print("*******  [SmartClock] Calander date : ");
         Serial.print(currentMonth_);  Serial.print("/");Serial.print(currentDay_);  Serial.print("/");Serial.print(currentYear_);  Serial.print(" *******\n\n");
 
 
         // update azan clock 
         azan_.update_clock(currentYear_, currentMonth_, currentDay_);
         prayerAlarm_ = azan_.next_prayer_in_minutes(getCurrentTimeInMinutes());
-        Serial.print("next prayer coming in ");
+        Serial.print("[SmartClock] next prayer coming in ");
         Serial.print(prayerAlarm_);
         Serial.println(" minutes");
 
@@ -53,9 +53,7 @@ public:
 
     void update_clock()
     {
-        Serial.println("updating minute clock");
         // this will perform software update 
-        // azan_.update_clock(currentYear_, currentMonth_, currentDay_);
         ++currentMinute_;
         --prayerAlarm_;
         if(currentMinute_ >= 60)
@@ -64,24 +62,25 @@ public:
             currentMinute_ = 0;
         }
 
-        // check prayer alarm 
+        // check prayer alarm when prayerAlarm is up
         if(prayerAlarm_ == 0)
         {
-            Serial.println("Azan time");
+            Serial.println("[SmartClock] AZAN time, go to pray ...");
             prayerAlarm_ = azan_.next_prayer_in_minutes(getCurrentTimeInMinutes());
-           
-            
         }
         else
         {
-            Serial.print("next prayer coming in ");
+            Serial.print("[SmartClock] next prayer is coming in ");
             Serial.print(prayerAlarm_);
             Serial.println(" minutes");
         }
 
-        // every day sync clock at 12:00 AM
-        if(currentHour_ == 23 && currentMinute_ == 59)
+        // every day sync clock at 12:01 AM
+        if(currentHour_ == 0 && currentMinute_ == 1)
+        {
+            Serial.println("[SmartClock] synchronizing with the ntp and azan clocks");
             reset_clock();
+        } 
     }
 
     int next_prayer()
