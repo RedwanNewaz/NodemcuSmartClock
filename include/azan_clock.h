@@ -1,5 +1,6 @@
 /* created by Redwan Newaz 
-* nodemcu cannot compute prayer times accurately using the PrayerTimes library
+* nodemcu 0.9 cannot compute prayer times accurately using the PrayerTimes library
+* https://github.com/asmaklad/Arduino-Prayer-Times
 * therefore we need to invoke the prayer times from the server bellow 
 * static const char * url = "http://api.aladhan.com/v1/calendar?latitude=xxx&longitude=yyy&method=2&month=12&year=2021";
 * this server will reponse with a json file which needs to be decoded for computing prayer time    
