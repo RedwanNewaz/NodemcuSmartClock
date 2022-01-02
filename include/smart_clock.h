@@ -13,6 +13,11 @@ public:
 
     }
 
+    /**
+     * @brief This function will synchronize time with ntp server \par
+     * Then it will invoke the button clock to change the clock display time \par
+     * Finally it will synchronize the azan time for particular date
+     */
     void reset_clock()
     {
         Serial.println(" \n \t\t [SmartClock] Updating clock ...");
@@ -24,6 +29,24 @@ public:
         currentHour_ = getHours();
         currentMinute_ = getMinutes();
         currentSecond_ = getSeconds();
+        //button clock sometimes take long time to set up the clock 
+        //we need to calculate offset for it including second as well 
+        // delay for button: power (4) + memory (4) + minute (0.1) + hour (0.1) + finish (0.1)
+        currentSecond_ += 4 + 4  + 0.1 * currentMinute_  + 0.1 * currentHour_ + 0.1;
+
+        // compute carry for minute and hour from currentSecond 
+        int minute_carry = currentSecond_ / 60;
+        currentMinute_ += minute_carry;
+        int hour_carry = currentMinute_ / 60;
+        currentHour_ += hour_carry;
+
+        // second and minute cannot be more than 60
+        currentSecond_ = currentSecond_ % 60;
+        currentMinute_ = currentMinute_ % 60;
+        // hour cannot be more than 24
+        currentHour_ = currentHour_ % 24; 
+
+
         bcc_.set_time(currentHour_, currentMinute_);
 
         // get day, month and year
@@ -35,13 +58,10 @@ public:
             currentMonth_ = getMonth(rawtime);
             currentYear_ = getYear(rawtime);
         }
-        
-       
+          
 
         Serial.print("*******  [SmartClock] Calander date : ");
         Serial.print(currentMonth_);  Serial.print("/");Serial.print(currentDay_);  Serial.print("/");Serial.print(currentYear_);  Serial.print(" *******\n\n");
-
-
         // update azan clock 
         azan_.update_clock(currentYear_, currentMonth_, currentDay_);
         prayerAlarm_ = azan_.next_prayer_in_minutes(getCurrentTimeInMinutes());
@@ -50,6 +70,14 @@ public:
         Serial.println(" minutes");
 
     }
+
+    /**
+     * @brief In order to compute next prayer time we need to periodically update internal smart clock variables. \par 
+     * Smart clock clock gets updated every minute from the timer function (defined in main.cpp) \par
+     * The timer function maintains a priority list where update_clock() function appears first and then repeat_azan_clock (defined in main.cpp) \par 
+     * This way repeat_azan_clock function skips current azan time whose wav sound will be performing in the next iteration in void loop() function \par 
+     * and sets the timer for the next prayer time
+     */
 
     void update_clock()
     {

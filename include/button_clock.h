@@ -1,7 +1,8 @@
 #pragma once 
 
 #include <Arduino.h>
-
+#define LONG_DEBOUNCE (2000)
+#define SHORT_DEBOUNCE (50)
 
 namespace ButtonClock{
   class Button{
@@ -36,13 +37,15 @@ namespace ButtonClock{
     Clock(int power_pin, int reset_pin, int hour_pin, int minute_pin):
     power_pin_(power_pin), reset_pin_(reset_pin), hour_pin_(hour_pin), minute_pin_(minute_pin)
     {
-        this->reset_time_ = 2000;
-        this->debounce_time_ = 50; 
+        this->reset_time_ = LONG_DEBOUNCE;
+        this->debounce_time_ = SHORT_DEBOUNCE; 
+
         pinMode(hour_pin, OUTPUT);
         pinMode(minute_pin, OUTPUT);
         pinMode(reset_pin, OUTPUT);
         pinMode(power_pin, OUTPUT);
 
+        // this logic is based on NPN transistors 
         digitalWrite(hour_pin, LOW);
         digitalWrite(minute_pin, LOW);
         digitalWrite(reset_pin, LOW);

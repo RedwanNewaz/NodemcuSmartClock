@@ -12,10 +12,11 @@ public:
      
     }
 
-    /* @brief this function needs to be invoked every time when we play azan \par
-    * azan wav file get deleted after each run
-    * TODO we can play multiple azans if it fits in the rom 
-    */
+    /**
+     * @brief azan wav file get deleted after each run \par
+     * Therefore, this function needs to call every prayer time \par 
+     * TODO we can play multiple azans if it fits in the rom 
+     */
     void begin()
     {        
         audioLogger = &Serial;
