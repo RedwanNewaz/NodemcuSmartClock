@@ -15,6 +15,8 @@
 #define EEPROM_LONGITUDE_LEN (120)
 #define EEPROM_LONGITUDE_STR (123)
 
+#define EEPROM_PRAYER_METHOD (60)
+
 namespace WifiManager{
 
     struct Credential{
@@ -31,10 +33,26 @@ namespace WifiManager{
 
     class Manager{
     public:
+        /**
+         * @brief Construct a new Manager object.
+         * An important caveat is that the maximum buffer length needs to be smaller than eRead size \par
+         * Plus pay attention to the location of your EEPROM variables which are defined above \par 
+         * Make sure your variables don't overwirte each other
+         * Maintain enough distance for defining each variable location
+         */
         Manager()
         {
             EEPROM.begin(512); 
         }
+
+        /**
+         * @brief although it is more appropriate to use double as each argument type, 
+         * nodemcu cannot convert them properly. It is much convenient to directly save them as a string format.
+         * 
+         * @param str_time_zone your current time zone in const string format 
+         * @param str_latitude  your latitude in const string format
+         * @param str_longitude your longitude in const string format 
+         */
         void write_location(const char* str_time_zone,  const char* str_latitude, const char* str_longitude)
         {
             Serial.println("\t[WifiManager] Writing Data Begin...");
@@ -53,6 +71,28 @@ namespace WifiManager{
             Serial.println("\t[WifiManager] Writing Data Completed!");
         }
 
+        /**
+         * @brief writing prayer method in eeprom e.g., ISNA -> 2 \par 
+         * For more information see this website https://aladhan.com/calculation-methods
+         * prayer method is so small we can save it as byte 
+         * @param method 
+         */
+        void write_prayer_method(int method)
+        {
+            SaveByte(EEPROM_PRAYER_METHOD, method);
+        }
+
+        String get_prayer_method()
+        {
+            byte x = ReadByte(EEPROM_PRAYER_METHOD);
+            return (String) x;
+        }
+
+        /**
+         * @brief Get the location of your place
+         * Azan clock needs this information to find the prayer times for your specific location 
+         * @return Location 
+         */
         Location get_location()
         {
             byte x = -2;
@@ -73,6 +113,11 @@ namespace WifiManager{
             return{tempLat, tempLon};
         }
 
+        /**
+         * @brief Get the timezone of your place 
+         * Smart clock needs this information to calculate offset in time from the ntp server; 
+         * @return int 
+         */
         int get_timezone()
         {
             byte x = -2;
@@ -100,7 +145,6 @@ namespace WifiManager{
             byte x = -2;
             x = ReadByte(1);
 
-            
             if (x == 10)
             {
                 Serial.println("[WifiManager] Reading wifi credential ...");

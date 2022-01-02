@@ -3,6 +3,7 @@
 #include <WiFiUdp.h>
 #include <EEPROM.h>
 #include <arduino-timer.h>
+#include <ArduinoOTA.h>
 
 
 #include "smart_clock.h"
@@ -45,7 +46,7 @@ void setup() {
   // save personal information to EEPROM 
   // manager.write_credential("your ssid", "your password")
   // manager.write_location("your_tz", "your_lat", "your_lon"); 
-
+  // manager.write_prayer_method(2);// for ISNA 
   Serial.print("Connecting to ");
   auto net = manager.get_credential();
   WiFi.begin(net.ssid, net.password);
@@ -54,6 +55,8 @@ void setup() {
     delay(500);
     Serial.print(".");
   }
+  // start OTA for software update 
+  ArduinoOTA.begin();
   timer.in(5e6, initialize_smart_clock);  
   timer.in(3e7, repeat_azan_clock); 
 }
@@ -61,18 +64,20 @@ void setup() {
 void loop() {
   // run timer tick repeatedly to make timer operationalize 
   timer.tick();
-  // azan wav won't works anywhere but inside the loop 
+  // DON'T change this two lines! azan wav won't works anywhere but inside the loop 
   // it needs to be initiated using a timer callback 
   if (wav.isRunning()) {
     if (!wav.loop()) wav.stop();
   }
+  // Check for over the air update request and (if present) flash it
+  ArduinoOTA.handle();
 }
 
 // -------------- Functions for timer --------------
-/*@brief this function will initialize the smart clock once after getting connected with the wifi \par
-* initialization process invokes the button clock to setup the current time from ntp server  
-* it will also create a timer for updating smart clock internal time in every minute  \par
-*/
+/**
+ * @brief initialization process invokes the button clock to setup the current time from ntp server  
+ * it will also create a timer for updating smart clock internal time in every minute  \par
+ */
 bool initialize_smart_clock(void *argument)
 {
   Serial.println("\n[Main::init] initializing smart clock ");
@@ -84,9 +89,10 @@ bool initialize_smart_clock(void *argument)
   return false;
 }
 
-/*@brief smart clock maintains internal clock counter to update next prayer time \par 
-* smart clock get synchronized with the ntp server @ 12:00 AM every day  
-*/
+/**
+ * @brief smart clock maintains internal clock counter to update next prayer time \par 
+ * smart clock get synchronized with the ntp server @ 12:00 AM every day   * 
+ */
 bool update_smart_clock(void *argument)
 {
   smart_clock.update_clock();
@@ -99,11 +105,11 @@ bool update_2s_clock(void *argument)
   return true;
 }
 
-/*@brief this function will play the azan music during prayer time \par 
-* when the system get initialized for the first time, azan will be played as well \par 
-* it creates a timer task for repeating azan based on the next prayer time \par
-* azan wav needs to load every time 
-*/
+/**
+ * @brief when the system get initialized for the first time, azan will be played as well \par 
+ * it creates a timer task for repeating azan based on the next prayer time \par
+ * azan wav needs to load every time 
+ */
 bool repeat_azan_clock(void *argument)
 {
   

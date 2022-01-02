@@ -1,7 +1,8 @@
 /* created by Redwan Newaz 
-* nodemcu cannot compute prayer times accurately using the PrayerTimes library
+* nodemcu 0.9 cannot compute prayer times accurately using the PrayerTimes library
+* https://github.com/asmaklad/Arduino-Prayer-Times
 * therefore we need to invoke the prayer times from the server bellow 
-* static const char * url = "http://api.aladhan.com/v1/calendar?latitude=36.1092602&longitude=-79.8216712&method=2&month=12&year=2021";
+* static const char * url = "http://api.aladhan.com/v1/calendar?latitude=xxx&longitude=yyy&method=2&month=12&year=2021";
 * this server will reponse with a json file which needs to be decoded for computing prayer time    
 */
 #pragma once 
@@ -17,11 +18,26 @@ extern WifiManager::Manager manager;
 
 class AzanClock{
 public:
+    /**
+     * @brief Construct a new Azan Clock object
+     * Nodemcu has a limited computational resources. \par 
+     * Existing prayer time library cannot compute prayer time accurately for nodemcu but it works perfect in a desktop environment. \par 
+     * Threfore, we rely on aladhan website api to compute prayer times
+     */
     AzanClock()
     {
 
     }
 
+    /**
+     * @brief azan server sends a big chunk of data in string format \par 
+     * we need to decode this data to compute the prayer time \par 
+     * Luckily this data is in json format and I am hoping they maintain same standard all the time. \par 
+     * While decoding time from string format requires so many complex operations --split, string to int conversion,
+     * we can simply hard code the postion of hour and minutes to avoid such complex operation for nodemcu. 
+     * 
+     * @param html file in string format 
+     */
     void decode_html_string(const String& html)
     {
         DynamicJsonDocument doc(1024);
@@ -72,7 +88,7 @@ public:
 
     void update_clock(int year, int month, int day)
     {
-        // TODO store method ISNA to eeprom 
+        // get prayer method from the eeprom 
         // manager is a wifi manager instance which manages eeprom data  
         auto loc = manager.get_location();
 
@@ -80,7 +96,7 @@ public:
         String longitude        = loc.longitude;
         String my_latitude      = "http://api.aladhan.com/v1/calendar?latitude=" + latitude; 
         String my_longitude     = "&longitude=" + longitude; 
-        String my_calc_method   = "&method=2"; // ISNA
+        String my_calc_method   = "&method=" + manager.get_prayer_method(); 
         String my_month         = "&month=" + String(month);
         String my_year          = "&year=" + String(year);
         String timeline_url = my_latitude + my_longitude + my_calc_method + my_month + my_year;
