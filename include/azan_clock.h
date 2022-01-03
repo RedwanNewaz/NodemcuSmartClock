@@ -9,10 +9,12 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
 #include <ESP8266HTTPClient.h>
+#include <RemoteDebug.h>
 #include <WiFiClient.h>
 #include "wifi_manager.h"
 
 extern WifiManager::Manager manager; 
+extern RemoteDebug Debug;
 
 #define NUM_DAILY_PRAYERS (5)
 
@@ -79,10 +81,13 @@ public:
                 decode_html_string(http_.getString());
             } else {
                 Serial.printf("[AzanClock::HTTP] GET... failed, error: %s\n", http_.errorToString(httpCode).c_str());
+                debugE("[AzanClock::HTTP] GET... failed, error: %s\n", http_.errorToString(httpCode).c_str());
+
             }
             http_.end();
         } else {
             Serial.printf("[AzanClock::HTTP] Unable to connect\n");
+            debugE("[AzanClock::HTTP] Unable to connect");
         }
     }
 
@@ -106,10 +111,12 @@ public:
 
         // debug whether conversion is appropriate 
         Serial.println("\n\n[AzanClock::HTTP] minute values for 5 prayers \n");
+        debugV("[AzanClock::HTTP] minute values for 5 prayers");
         for (size_t i = 0; i < NUM_DAILY_PRAYERS; i++)
         {
             Serial.print(prayers[i]); Serial.print("\t\t:\t");
             Serial.println(daily_prayer_times_[i]);
+            debugI("%s \t\t:\t %d", prayers[i], daily_prayer_times_[i]);
         }
             
     }
@@ -123,6 +130,7 @@ public:
             {
                 Serial.print("[AzanClock] Next prayer is ");
                 Serial.println(daily_prayer_names_[i]);
+                debugI("[AzanClock] Next prayer is %s", daily_prayer_names_[i]);
                 return daily_prayer_times_[i] - currentTimeInMin; 
             }
         }
@@ -130,6 +138,7 @@ public:
         // after isha we need to wait until 12:00 AM to count time for the next day 
         Serial.print("[AzanClock] Next prayer is ");
         Serial.println(daily_prayer_names_[0]);
+        debugI("[AzanClock] Next prayer is %s", daily_prayer_names_[0]);
         return daily_prayer_times_[0] - currentTimeInMin + 24 * 60;
         
 

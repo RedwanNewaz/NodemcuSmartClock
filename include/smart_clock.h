@@ -1,9 +1,12 @@
 #pragma once 
 #include <Arduino.h>
 #include <NTPClient.h>
+#include <RemoteDebug.h>
 #include "button_clock.h"
 #include "azan_clock.h"
 #include "music_clock.h"
+
+extern RemoteDebug Debug;
 
 class SmartClock: public NTPClient{
 public:
@@ -94,6 +97,7 @@ public:
         if(prayerAlarm_ == 0)
         {
             Serial.println("[SmartClock] AZAN time, go to pray ...");
+            debugI("[SmartClock] AZAN time, go to pray ...");
             prayerAlarm_ = azan_.next_prayer_in_minutes(getCurrentTimeInMinutes());
         }
         else
@@ -101,12 +105,14 @@ public:
             Serial.print("[SmartClock] next prayer is coming in ");
             Serial.print(prayerAlarm_);
             Serial.println(" minutes");
+            debugI("[SmartClock] next prayer coming in %d minutes", prayerAlarm_);
         }
 
         // every day sync clock at 12:01 AM
         if(currentHour_ == 0 && currentMinute_ == 1)
         {
             Serial.println("[SmartClock] synchronizing with the ntp and azan clocks");
+            debugW("[SmartClock] synchronizing with the ntp and azan clocks");
             reset_clock();
         } 
     }
