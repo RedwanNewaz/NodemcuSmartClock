@@ -4,12 +4,15 @@
 #include <EEPROM.h>
 #include <arduino-timer.h>
 #include <ArduinoOTA.h>
-
+#include <RemoteDebug.h>
 
 #include "smart_clock.h"
 #include "wifi_manager.h"
 #include "azan_clock.h"
 #include "music_clock.h"
+
+#define HOST_NAME "192.168.1.161"
+#define USE_ARDUINO_OTA true
 
 
 #define RESET_PIN   (D1)
@@ -28,6 +31,9 @@ AzanClock azan_clock;
 MusicClock wav;
 // smart clock runs every thing and also maintains time synchronization with the ntp server and azan server 
 SmartClock smart_clock(ntpUDP, "pool.ntp.org", clock_button, azan_clock);
+
+// remote deubg 
+RemoteDebug Debug;
 
 // timer is useful for creating a software clock but it needs synchronization with the ntp clock  
 Timer<3, micros> timer;
@@ -55,8 +61,16 @@ void setup() {
     delay(500);
     Serial.print(".");
   }
+ 
   // start OTA for software update 
   ArduinoOTA.begin();
+  // intialize remote debug 
+  Debug.begin(HOST_NAME); // Initialize the WiFi server
+  Debug.setResetCmdEnabled(true); // Enable the reset command
+  Debug.showProfiler(true); // Profiler (Good to measure times, to optimize codes)
+  Debug.showColors(true); // Colors
+
+  // intialize timer 
   timer.in(5e6, initialize_smart_clock);  
   timer.in(3e7, repeat_azan_clock); 
 }
@@ -71,6 +85,8 @@ void loop() {
   }
   // Check for over the air update request and (if present) flash it
   ArduinoOTA.handle();
+  // update remote debug handle 
+  Debug.handle();
 }
 
 // -------------- Functions for timer --------------
@@ -85,6 +101,7 @@ bool initialize_smart_clock(void *argument)
   smart_clock.reset_clock();
   timer.every(6e7, update_smart_clock);
   Serial.print("[Main::init] Timer pending Task "); Serial.println(timer.size());
+  debugV("[Main::init] Timer pending Task %u", timer.size());
   // timer.every(2e6, update_2s_clock); // debuging purposes 
   return false;
 }
@@ -120,5 +137,6 @@ bool repeat_azan_clock(void *argument)
   Serial.print("[Main::timer] Azan will be repeated in ");
   Serial.println(wait_time);
   Serial.print("[Main::timer] Timer pending Task "); Serial.println(timer.size());
+  debugD("[Main::init] Azan will be repeated in %lf", wait_time);
   return false;
 }
