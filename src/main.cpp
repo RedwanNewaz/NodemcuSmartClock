@@ -97,7 +97,7 @@ void loop() {
 bool initialize_smart_clock(void *argument)
 {
   Serial.println("\n[Main::init] initializing smart clock ");
-  smart_clock.setTimeOffset(manager.get_timezone() * 3600);
+  // smart_clock.setTimeOffset(manager.get_timezone() * 3600);
   smart_clock.reset_clock();
   timer.every(6e7, update_smart_clock);
   Serial.print("[Main::init] Timer pending Task "); Serial.println(timer.size());

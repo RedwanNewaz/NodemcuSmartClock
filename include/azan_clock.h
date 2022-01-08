@@ -80,6 +80,7 @@ public:
         deserializeJson(doc, payload_);
         String country = doc["country"].as<String>();
         String city = doc["city"].as<String>();
+        timezone_ = doc["timezone"].as<String>();
 
         // manager is a wifi manager instance which manages eeprom data  
         String timeline_url = "http://api.aladhan.com/v1/timingsByCity?city=" + city + "&country=" + country + "&method=2";
@@ -133,11 +134,16 @@ public:
         
 
     }
+    const char *get_timezone()
+    {
+        return timezone_.c_str();
+    }
 
 private:
     int daily_prayer_times_[NUM_DAILY_PRAYERS];
     String daily_prayer_names_[NUM_DAILY_PRAYERS];
     const String prayers[7] = {"Fajr", "Sunrise", "Dhuhr", "Asr", "Sunset", "Maghrib", "Isha"};
     String payload_; 
+    String timezone_;
 
 };

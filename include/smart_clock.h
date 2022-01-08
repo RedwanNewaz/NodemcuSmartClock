@@ -24,6 +24,10 @@ public:
      */
     void reset_clock()
     {
+        // update azan clock for getting time zone 
+        azan_.update_clock();
+        setTZ(azan_.get_timezone());
+
         Serial.println(" \n \t\t [SmartClock] Updating clock ...");
         update();
         String formattedTime = getFormattedTime();
@@ -69,9 +73,6 @@ public:
 
         Serial.print("*******  [SmartClock] Calander date : ");
         Serial.print(currentMonth_);  Serial.print("/");Serial.print(currentDay_);  Serial.print("/");Serial.print(currentYear_);  Serial.print(" *******\n\n");
-        // update azan clock 
-        String epoch_time = (String) getEpochTime();
-        azan_.update_clock();
         prayerAlarm_ = azan_.next_prayer_in_minutes(getCurrentTimeInMinutes());
         Serial.print("[SmartClock] next prayer coming in ");
         Serial.print(prayerAlarm_);
