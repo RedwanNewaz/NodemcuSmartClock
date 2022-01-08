@@ -2,7 +2,7 @@
 
 #include <Arduino.h>
 #define LONG_DEBOUNCE (2000)
-#define SHORT_DEBOUNCE (50)
+#define SHORT_DEBOUNCE (75)
 
 namespace ButtonClock{
   class Button{

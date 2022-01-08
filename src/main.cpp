@@ -15,9 +15,9 @@
 #define USE_ARDUINO_OTA true
 
 
-#define RESET_PIN   (D1)
-#define MINIUTE_PIN (D2)
-#define HOUR_PIN    (D3)
+#define RESET_PIN   (D3)
+#define MINIUTE_PIN (D1)
+#define HOUR_PIN    (D2)
 #define POWER_PIN   (D0)
 
 
@@ -72,7 +72,7 @@ void setup() {
 
   // intialize timer 
   timer.in(5e6, initialize_smart_clock);  
-  timer.in(3e7, repeat_azan_clock); 
+  // timer.in(3e7, repeat_azan_clock); 
 }
 
 void loop() {
@@ -101,7 +101,6 @@ bool initialize_smart_clock(void *argument)
   smart_clock.reset_clock();
   timer.every(6e7, update_smart_clock);
   Serial.print("[Main::init] Timer pending Task "); Serial.println(timer.size());
-  debugV("[Main::init] Timer pending Task %u", timer.size());
   // timer.every(2e6, update_2s_clock); // debuging purposes 
   return false;
 }
@@ -137,6 +136,5 @@ bool repeat_azan_clock(void *argument)
   Serial.print("[Main::timer] Azan will be repeated in ");
   Serial.println(wait_time);
   Serial.print("[Main::timer] Timer pending Task "); Serial.println(timer.size());
-  debugD("[Main::init] Azan will be repeated in %lf", wait_time);
   return false;
 }

@@ -5,6 +5,7 @@
 #include "button_clock.h"
 #include "azan_clock.h"
 #include "music_clock.h"
+#define PRECISE_CLOCK
 
 extern RemoteDebug Debug;
 
@@ -32,10 +33,12 @@ public:
         currentHour_ = getHours();
         currentMinute_ = getMinutes();
         currentSecond_ = getSeconds();
+
+#ifdef PRECISE_CLOCK
         //button clock sometimes take long time to set up the clock 
         //we need to calculate offset for it including second as well 
         // delay for button: power (4) + memory (4) + minute (0.1) + hour (0.1) + finish (0.1)
-        currentSecond_ += 4 + 4  + 0.1 * currentMinute_  + 0.1 * currentHour_ + 0.1;
+        currentSecond_ += 4 + 4  + 0.15 * currentMinute_  + 0.15 * currentHour_ + 0.15;
 
         // compute carry for minute and hour from currentSecond 
         int minute_carry = currentSecond_ / 60;
@@ -47,7 +50,8 @@ public:
         currentSecond_ = currentSecond_ % 60;
         currentMinute_ = currentMinute_ % 60;
         // hour cannot be more than 24
-        currentHour_ = currentHour_ % 24; 
+        currentHour_ = currentHour_ % 24;
+#endif  
 
 
         bcc_.set_time(currentHour_, currentMinute_);
@@ -66,7 +70,8 @@ public:
         Serial.print("*******  [SmartClock] Calander date : ");
         Serial.print(currentMonth_);  Serial.print("/");Serial.print(currentDay_);  Serial.print("/");Serial.print(currentYear_);  Serial.print(" *******\n\n");
         // update azan clock 
-        azan_.update_clock(currentYear_, currentMonth_, currentDay_);
+        String epoch_time = (String) getEpochTime();
+        azan_.update_clock();
         prayerAlarm_ = azan_.next_prayer_in_minutes(getCurrentTimeInMinutes());
         Serial.print("[SmartClock] next prayer coming in ");
         Serial.print(prayerAlarm_);
