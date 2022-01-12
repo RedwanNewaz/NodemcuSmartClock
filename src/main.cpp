@@ -97,7 +97,7 @@ void loop() {
 bool initialize_smart_clock(void *argument)
 {
   Serial.println("\n[Main::init] initializing smart clock ");
-  // smart_clock.setTimeOffset(manager.get_timezone() * 3600);
+  smart_clock.setTimeOffset(manager.get_timezone() * 3600);
   smart_clock.reset_clock();
   timer.every(6e7, update_smart_clock);
   Serial.print("[Main::init] Timer pending Task "); Serial.println(timer.size());
@@ -129,12 +129,12 @@ bool update_2s_clock(void *argument)
 bool repeat_azan_clock(void *argument)
 {
   
-  auto wait_time = smart_clock.next_prayer() * 60 * 1e6;
+  // auto wait_time = smart_clock.next_prayer() * 60 * 1e6;
   // auto wait_time = 1 * 60 * 1e6;
-  timer.in(wait_time, repeat_azan_clock); 
+  // timer.in(wait_time, repeat_azan_clock); 
   wav.begin();
-  Serial.print("[Main::timer] Azan will be repeated in ");
-  Serial.println(wait_time);
+  // Serial.print("[Main::timer] Azan will be repeated in ");
+  // Serial.println(wait_time);
   Serial.print("[Main::timer] Timer pending Task "); Serial.println(timer.size());
   return false;
 }

@@ -16,6 +16,7 @@
 extern WifiManager::Manager manager; 
 extern RemoteDebug Debug;
 
+
 #define NUM_DAILY_PRAYERS (5)
 
 class AzanClock{
@@ -90,6 +91,7 @@ public:
       
         
         deserializeJson(doc, payload_);
+        timestamp_ = doc["date"]["timestamp"].as<long>();
         
         int avoid_indexes[2] = {1 , 4}; // these are sunrise and sunset times  
         int count  = 0;
@@ -139,11 +141,17 @@ public:
         return timezone_.c_str();
     }
 
+    long get_timestamp()
+    {
+        return timestamp_;
+    }
+
 private:
     int daily_prayer_times_[NUM_DAILY_PRAYERS];
     String daily_prayer_names_[NUM_DAILY_PRAYERS];
     const String prayers[7] = {"Fajr", "Sunrise", "Dhuhr", "Asr", "Sunset", "Maghrib", "Isha"};
     String payload_; 
     String timezone_;
+    long timestamp_;
 
 };

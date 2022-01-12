@@ -8,6 +8,7 @@
 #define PRECISE_CLOCK
 
 extern RemoteDebug Debug;
+extern MusicClock wav;
 
 class SmartClock: public NTPClient{
 public:
@@ -25,8 +26,8 @@ public:
     void reset_clock()
     {
         // update azan clock for getting time zone 
-        azan_.update_clock();
-        setTZ(azan_.get_timezone());
+        // azan_.update_clock();
+        // setTZ(azan_.get_timezone());
 
         Serial.println(" \n \t\t [SmartClock] Updating clock ...");
         update();
@@ -60,11 +61,13 @@ public:
 
         bcc_.set_time(currentHour_, currentMinute_);
 
+        azan_.update_clock();
+
         // get day, month and year
         for (size_t i = 0; i < 2; i++)
         {
             // sometimes it does not get it right at first try
-            time_t rawtime = this->getEpochTime();
+            time_t rawtime = azan_.get_timestamp();
             currentDay_ = getDate(rawtime);
             currentMonth_ = getMonth(rawtime);
             currentYear_ = getYear(rawtime);
@@ -73,6 +76,7 @@ public:
 
         Serial.print("*******  [SmartClock] Calander date : ");
         Serial.print(currentMonth_);  Serial.print("/");Serial.print(currentDay_);  Serial.print("/");Serial.print(currentYear_);  Serial.print(" *******\n\n");
+        // azan_.update_clock();
         prayerAlarm_ = azan_.next_prayer_in_minutes(getCurrentTimeInMinutes());
         Serial.print("[SmartClock] next prayer coming in ");
         Serial.print(prayerAlarm_);
@@ -104,6 +108,7 @@ public:
         {
             Serial.println("[SmartClock] AZAN time, go to pray ...");
             debugI("[SmartClock] AZAN time, go to pray ...");
+            wav.begin();
             prayerAlarm_ = azan_.next_prayer_in_minutes(getCurrentTimeInMinutes());
         }
         else
