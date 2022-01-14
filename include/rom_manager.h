@@ -17,7 +17,7 @@
 
 #define EEPROM_PRAYER_METHOD (60)
 
-namespace WifiManager{
+namespace ROM{
 
     struct Credential{
         const char* ssid ;
@@ -55,7 +55,7 @@ namespace WifiManager{
          */
         void write_location(const char* str_time_zone,  const char* str_latitude, const char* str_longitude)
         {
-            Serial.println("\t[WifiManager] Writing Data Begin...");
+            Serial.println("\t[ROM] Writing Data Begin...");
  
             SaveByte(EEPROM_TIME_ZONE_LEN, strlen(str_time_zone));
             SaveString(EEPROM_TIME_ZONE_STR, str_time_zone);
@@ -68,7 +68,7 @@ namespace WifiManager{
             SaveByte(EEPROM_LONGITUDE_LEN, strlen(str_longitude));
             SaveString(EEPROM_LONGITUDE_STR, str_longitude);
             Serial.println(str_longitude);
-            Serial.println("\t[WifiManager] Writing Data Completed!");
+            Serial.println("\t[ROM] Writing Data Completed!");
         }
 
         /**
@@ -109,7 +109,7 @@ namespace WifiManager{
             tempLon = "";
             for (byte i = 0; i < len; i++)
             tempLon += eRead[i];
-            Serial.println("[WifiManager] Reading location Completed!");
+            Serial.println("[ROM] Reading location Completed!");
             return{tempLat, tempLon};
         }
 
@@ -126,19 +126,19 @@ namespace WifiManager{
             tempTZ = "";
             for (byte i = 0; i < len; i++)
             tempTZ += eRead[i];
-            Serial.println("[WifiManager] Reading timezone Completed!");
+            Serial.println("[ROM] Reading timezone Completed!");
             return tempTZ.toInt();
         }
 
         void write_credential(const char* ssid, const char* password)
         {
-            Serial.println("\t[WifiManager] Writing Data Begin...");
+            Serial.println("\t[ROM] Writing Data Begin...");
             SaveByte(1, 10);
             SaveByte(EEPROM_SSID_LEN, strlen(ssid)); // Length of ssid
             SaveByte(EEPROM_PASS_LEN, strlen(password)); // Length of password
             SaveString(EEPROM_SSID_STR, ssid);
             SaveString(EEPROM_PASS_STR, password);
-            Serial.println("\t[WifiManager] Writing Data Complated!");
+            Serial.println("\t[ROM] Writing Data Complated!");
         }
         Credential get_credential()
         {
@@ -147,7 +147,7 @@ namespace WifiManager{
 
             if (x == 10)
             {
-                Serial.println("[WifiManager] Reading wifi credential ...");
+                Serial.println("[ROM] Reading wifi credential ...");
                 x = ReadByte(EEPROM_SSID_LEN);
                 ReadString(EEPROM_SSID_STR, x);
                 tempS = "";
@@ -162,7 +162,7 @@ namespace WifiManager{
                 return {tempS.c_str(), tempP.c_str()};               
             }
 
-            Serial.println("[WifiManager] No credential found!");
+            Serial.println("[ROM] No credential found!");
             return {};
         }
 
