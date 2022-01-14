@@ -53,7 +53,7 @@ public:
         //button clock sometimes take long time to set up the clock 
         //we need to calculate offset for it including second as well 
         // delay for button: power (4) + memory (4) + minute (0.1) + hour (0.1) + finish (0.1)
-        currentSecond_ += 4 + 4  + 0.15 * currentMinute_  + 0.15 * currentHour_ + 0.15;
+        currentSecond_ += 4 + 4  + 0.15 * currentMinute_  + 0.15 * currentHour_ + 0.15 + 20; // 20s offet
 
         // compute carry for minute and hour from currentSecond 
         int minute_carry = currentSecond_ / 60;
