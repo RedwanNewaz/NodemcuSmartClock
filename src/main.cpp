@@ -7,9 +7,8 @@
 #include <RemoteDebug.h>
 
 #include "smart_clock.h"
-#include "wifi_manager.h"
+#include "rom_manager.h"
 #include "azan_clock.h"
-#include "music_clock.h"
 
 #define HOST_NAME "192.168.1.161"
 #define USE_ARDUINO_OTA true
@@ -21,14 +20,20 @@
 #define POWER_PIN   (D0)
 
 
-WifiManager::Manager manager; 
+// music clock play azan sound when it is triggered by azan clock 
+#ifdef OFFLINE_AZAN
+MusicClock wav;
+#else
+// azan will be streamed from the internet 
+StreamAzan wav;
+#endif 
+
+ROM::Manager manager; 
 WiFiUDP ntpUDP;
 ButtonClock::Clock clock_button(POWER_PIN, RESET_PIN, HOUR_PIN, MINIUTE_PIN);
 
 // azan clock keep tracks of prayer time based on current date and time 
 AzanClock azan_clock;
-// music clock play azan sound when it is triggered by azan clock 
-MusicClock wav;
 // smart clock runs every thing and also maintains time synchronization with the ntp server and azan server 
 SmartClock smart_clock(ntpUDP, "pool.ntp.org", clock_button, azan_clock);
 

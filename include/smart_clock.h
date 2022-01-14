@@ -4,11 +4,21 @@
 #include <RemoteDebug.h>
 #include "button_clock.h"
 #include "azan_clock.h"
+
+#ifdef OFFLINE_AZAN
 #include "music_clock.h"
+extern MusicClock wav;
+#else
+#include "stream_azan.h"
+// azan will be streamed from the internet 
+extern StreamAzan wav;
+#endif 
+
 #define PRECISE_CLOCK
 
 extern RemoteDebug Debug;
-extern MusicClock wav;
+
+
 
 class SmartClock: public NTPClient{
 public:

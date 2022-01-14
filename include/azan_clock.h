@@ -11,9 +11,9 @@
 #include <ESP8266HTTPClient.h>
 #include <RemoteDebug.h>
 #include <WiFiClient.h>
-#include "wifi_manager.h"
+#include "rom_manager.h"
 
-extern WifiManager::Manager manager; 
+extern ROM::Manager manager; 
 extern RemoteDebug Debug;
 
 
