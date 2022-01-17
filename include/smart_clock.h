@@ -5,15 +5,6 @@
 #include "button_clock.h"
 #include "azan_clock.h"
 
-#ifdef OFFLINE_AZAN
-#include "music_clock.h"
-extern MusicClock wav;
-#else
-#include "stream_azan.h"
-// azan will be streamed from the internet 
-extern StreamAzan wav;
-#endif 
-
 #define PRECISE_CLOCK
 
 extern RemoteDebug Debug;
@@ -25,7 +16,7 @@ public:
     SmartClock(UDP& udp, const char* poolServerName, ButtonClock::Clock& bcc, AzanClock& azan):
     NTPClient(udp, poolServerName), bcc_(bcc), azan_(azan)
     {
-
+        prayerAlarm_ = -1;
     }
 
     /**
@@ -39,15 +30,7 @@ public:
         // azan_.update_clock();
         // setTZ(azan_.get_timezone());
 
-        Serial.println(" \n \t\t [SmartClock] Updating clock ...");
-        update();
-        String formattedTime = getFormattedTime();
-        Serial.print("[SmartClock] Formatted Time: ");
-        Serial.println(formattedTime);  
-
-        currentHour_ = getHours();
-        currentMinute_ = getMinutes();
-        currentSecond_ = getSeconds();
+        sync_clock();
 
 #ifdef PRECISE_CLOCK
         //button clock sometimes take long time to set up the clock 
@@ -94,6 +77,20 @@ public:
 
     }
 
+    void sync_next_prayer_alarm()
+    {
+        prayerAlarm_ = azan_.next_prayer_in_minutes(getCurrentTimeInMinutes());
+    }
+
+    void sync_clock()
+    {
+        debugI(" \n \t\t [SmartClock] soft reset: Updating clock ...");
+        update();
+        currentHour_ = getHours();
+        currentMinute_ = getMinutes();
+        currentSecond_ = getSeconds();
+    }
+
     /**
      * @brief In order to compute next prayer time we need to periodically update internal smart clock variables. \par 
      * Smart clock clock gets updated every minute from the timer function (defined in main.cpp) \par
@@ -106,29 +103,18 @@ public:
     {
         // this will perform software update 
         ++currentMinute_;
-        --prayerAlarm_;
+        
+        // make sure prayer alarm does not go negative 
+        if(prayerAlarm_ > 0)
+            --prayerAlarm_;
+        
         if(currentMinute_ >= 60)
         {
             currentHour_ = (currentHour_ + 1) % 24;
             currentMinute_ = 0;
         }
 
-        // check prayer alarm when prayerAlarm is up
-        if(prayerAlarm_ == 0)
-        {
-            Serial.println("[SmartClock] AZAN time, go to pray ...");
-            debugI("[SmartClock] AZAN time, go to pray ...");
-            wav.begin();
-            prayerAlarm_ = azan_.next_prayer_in_minutes(getCurrentTimeInMinutes());
-        }
-        else
-        {
-            Serial.print("[SmartClock] next prayer is coming in ");
-            Serial.print(prayerAlarm_);
-            Serial.println(" minutes");
-            debugI("[SmartClock] next prayer coming in %d minutes", prayerAlarm_);
-        }
-
+   
         // every day sync clock at 12:01 AM
         if(currentHour_ == 0 && currentMinute_ == 1)
         {

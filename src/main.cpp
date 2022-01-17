@@ -19,12 +19,25 @@
 #define HOUR_PIN    (D2)
 #define POWER_PIN   (D0)
 
+/* DIAGRAM 
+  clock input: (W-, W+, B-, G+)
+  nodemcu input (D3, D1, D2)
+    W-    W+    B-    G+
+    |     |     |     |
+    --------------------
+      |     |      |  
+      D3    D1     D2 
+  Since W+ and B- have multiple use, only 3 transistors are used to make this circuit 
+*/
+
 
 // music clock play azan sound when it is triggered by azan clock 
 #ifdef OFFLINE_AZAN
+#include "music_clock.h"
 MusicClock wav;
 #else
 // azan will be streamed from the internet 
+#include "stream_azan.h"
 StreamAzan wav;
 #endif 
 
@@ -39,6 +52,7 @@ SmartClock smart_clock(ntpUDP, "pool.ntp.org", clock_button, azan_clock);
 
 // remote deubg 
 RemoteDebug Debug;
+volatile bool initialization = false;
 
 // timer is useful for creating a software clock but it needs synchronization with the ntp clock  
 Timer<3, micros> timer;
@@ -77,16 +91,37 @@ void setup() {
 
   // intialize timer 
   timer.in(5e6, initialize_smart_clock);  
-  // timer.in(3e7, repeat_azan_clock); 
+  timer.in(3e7, repeat_azan_clock); 
 }
 
 void loop() {
   // run timer tick repeatedly to make timer operationalize 
   timer.tick();
+
+  // play azan when count down time is zero
+  if(smart_clock.next_prayer() == 0)
+  {
+    // cancel all pending tasks 
+    timer.cancel();
+    // this way wav file  does not repeat
+    smart_clock.sync_next_prayer_alarm();
+    Serial.println("[SmartClock] AZAN time, go to pray ...");
+    debugI("[SmartClock] AZAN time, go to pray ...");
+    wav.begin();
+  }
   // DON'T change this two lines! azan wav won't works anywhere but inside the loop 
   // it needs to be initiated using a timer callback 
   if (wav.isRunning()) {
-    if (!wav.loop()) wav.stop();
+    if (!wav.loop())
+    {
+      wav.stop();
+      // sync smart clock time 
+      smart_clock.sync_clock();
+      // make sure there is no pending timer task 
+      timer.cancel();
+      //resume smart clock timer 
+      timer.every(6e7, update_smart_clock);
+    }
   }
   // Check for over the air update request and (if present) flash it
   ArduinoOTA.handle();
@@ -116,6 +151,7 @@ bool initialize_smart_clock(void *argument)
  */
 bool update_smart_clock(void *argument)
 {
+  debugI("[SmartClock v2] next prayer is coming in %d minutes", smart_clock.next_prayer());
   smart_clock.update_clock();
   return true;
 }
@@ -133,13 +169,19 @@ bool update_2s_clock(void *argument)
  */
 bool repeat_azan_clock(void *argument)
 {
+  if(!initialization)
+  {
+    // test azan for 30s 
+    debugI("[Main::debug] azan will play for 30s");
+    wav.begin(); 
+    initialization = true; 
+    return true;  
+  }
+  // next time when it will come back stop azan 
+  wav.desync(); 
+  wav.forceStop();
+  wav.stop();
   
-  // auto wait_time = smart_clock.next_prayer() * 60 * 1e6;
-  // auto wait_time = 1 * 60 * 1e6;
-  // timer.in(wait_time, repeat_azan_clock); 
-  wav.begin();
-  // Serial.print("[Main::timer] Azan will be repeated in ");
-  // Serial.println(wait_time);
-  Serial.print("[Main::timer] Timer pending Task "); Serial.println(timer.size());
+  debugI("[Main::debug] azan will stop repeating");
   return false;
 }

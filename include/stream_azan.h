@@ -20,8 +20,13 @@ public:
         auto buff = new AudioFileSourceBuffer(file, 2048);
         buff->RegisterStatusCB(StatusCallback, (void*)"buffer");
         out = new AudioOutputI2SNoDAC();
+        out->SetGain(4.0);
         RegisterStatusCB(StatusCallback, (void*)"mp3");
         AudioGeneratorMP3::begin(buff, out);
+    }
+    void forceStop()
+    {
+        running = false; 
     }
 protected:
     // Called when a metadata event occurs (i.e. an ID3 tag, an ICY block, etc.
