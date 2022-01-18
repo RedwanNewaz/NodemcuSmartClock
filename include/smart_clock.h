@@ -5,15 +5,6 @@
 #include "button_clock.h"
 #include "azan_clock.h"
 
-#ifdef OFFLINE_AZAN
-#include "music_clock.h"
-extern MusicClock wav;
-#else
-#include "stream_azan.h"
-// azan will be streamed from the internet 
-extern StreamAzan wav;
-#endif 
-
 #define PRECISE_CLOCK
 
 extern RemoteDebug Debug;
@@ -25,7 +16,7 @@ public:
     SmartClock(UDP& udp, const char* poolServerName, ButtonClock::Clock& bcc, AzanClock& azan):
     NTPClient(udp, poolServerName), bcc_(bcc), azan_(azan)
     {
-
+        prayerAlarm_ = -1; 
     }
 
     /**
@@ -53,7 +44,8 @@ public:
         //button clock sometimes take long time to set up the clock 
         //we need to calculate offset for it including second as well 
         // delay for button: power (4) + memory (4) + minute (0.1) + hour (0.1) + finish (0.1)
-        currentSecond_ += 4 + 4  + 0.15 * currentMinute_  + 0.15 * currentHour_ + 0.15;
+        // clock offset is 40 sec
+        currentSecond_ += 4 + 4  + 0.15 * currentMinute_  + 0.15 * currentHour_ + 0.15 + 40;
 
         // compute carry for minute and hour from currentSecond 
         int minute_carry = currentSecond_ / 60;
@@ -70,27 +62,8 @@ public:
 
 
         bcc_.set_time(currentHour_, currentMinute_);
-
         azan_.update_clock();
-
-        // get day, month and year
-        for (size_t i = 0; i < 2; i++)
-        {
-            // sometimes it does not get it right at first try
-            time_t rawtime = azan_.get_timestamp();
-            currentDay_ = getDate(rawtime);
-            currentMonth_ = getMonth(rawtime);
-            currentYear_ = getYear(rawtime);
-        }
-          
-
-        Serial.print("*******  [SmartClock] Calander date : ");
-        Serial.print(currentMonth_);  Serial.print("/");Serial.print(currentDay_);  Serial.print("/");Serial.print(currentYear_);  Serial.print(" *******\n\n");
-        // azan_.update_clock();
-        prayerAlarm_ = azan_.next_prayer_in_minutes(getCurrentTimeInMinutes());
-        Serial.print("[SmartClock] next prayer coming in ");
-        Serial.print(prayerAlarm_);
-        Serial.println(" minutes");
+        update_next_prayer_alarm();
 
     }
 
@@ -106,7 +79,9 @@ public:
     {
         // this will perform software update 
         ++currentMinute_;
-        --prayerAlarm_;
+        if(prayerAlarm_ > 0)
+            --prayerAlarm_;
+        
         if(currentMinute_ >= 60)
         {
             currentHour_ = (currentHour_ + 1) % 24;
@@ -114,20 +89,7 @@ public:
         }
 
         // check prayer alarm when prayerAlarm is up
-        if(prayerAlarm_ == 0)
-        {
-            Serial.println("[SmartClock] AZAN time, go to pray ...");
-            debugI("[SmartClock] AZAN time, go to pray ...");
-            wav.begin();
-            prayerAlarm_ = azan_.next_prayer_in_minutes(getCurrentTimeInMinutes());
-        }
-        else
-        {
-            Serial.print("[SmartClock] next prayer is coming in ");
-            Serial.print(prayerAlarm_);
-            Serial.println(" minutes");
-            debugI("[SmartClock] next prayer coming in %d minutes", prayerAlarm_);
-        }
+        debugI("[SmartClock] next prayer coming in %d minutes", prayerAlarm_);
 
         // every day sync clock at 12:01 AM
         if(currentHour_ == 0 && currentMinute_ == 1)
@@ -141,6 +103,20 @@ public:
     int next_prayer()
     {
         return prayerAlarm_;
+    }
+    void update_next_prayer_alarm()
+    {
+        prayerAlarm_ = azan_.next_prayer_in_minutes(getCurrentTimeInMinutes());
+    }
+
+    int currentHour()
+    {
+        return currentHour_;
+    }
+
+    int currentMinute()
+    {
+        return currentMinute_;
     }
 private:
     ButtonClock::Clock bcc_;

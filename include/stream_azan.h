@@ -5,24 +5,29 @@
 #include "AudioFileSourceBuffer.h"
 #include "AudioGeneratorMP3.h"
 #include "AudioOutputI2SNoDAC.h"
-
+// #include "azan_clock.h"
+#define STREAM_BUFFER_SIZE (1024)
 
 
 class StreamAzan: public AudioGeneratorMP3{
 public:
-    void begin()
+    void begin(const PRAYER& prayer)
     {
         audioLogger = &Serial;
         file = new AudioFileSourceICYStream();
         file->RegisterMetadataCB(MDCallback, (void*)"ICY");
         file->useHTTP10();
         file->open(URL);
-        auto buff = new AudioFileSourceBuffer(file, 2048);
+        auto buff = new AudioFileSourceBuffer(file, STREAM_BUFFER_SIZE);
         buff->RegisterStatusCB(StatusCallback, (void*)"buffer");
         out = new AudioOutputI2SNoDAC();
+        //don't play loud azan during Fajr
+        if(prayer != PRAYER::Fajr)
+            out->SetGain(4.0);
         RegisterStatusCB(StatusCallback, (void*)"mp3");
         AudioGeneratorMP3::begin(buff, out);
     }
+        
 protected:
     // Called when a metadata event occurs (i.e. an ID3 tag, an ICY block, etc.
     static void MDCallback(void *cbData, const char *type, bool isUnicode, const char *string)
