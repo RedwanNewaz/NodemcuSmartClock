@@ -9,6 +9,7 @@
 #include "smart_clock.h"
 #include "rom_manager.h"
 #include "azan_clock.h"
+// #include "talking_clock.h"
 
 #define HOST_NAME "192.168.1.161"
 #define USE_ARDUINO_OTA true
@@ -19,27 +20,17 @@
 #define HOUR_PIN    (D2)
 #define POWER_PIN   (D0)
 
-/* DIAGRAM 
-  clock input: (W-, W+, B-, G+)
-  nodemcu input (D3, D1, D2)
-    W-    W+    B-    G+
-    |     |     |     |
-    --------------------
-      |     |      |  
-      D3    D1     D2 
-  Since W+ and B- have multiple use, only 3 transistors are used to make this circuit 
-*/
-
 
 // music clock play azan sound when it is triggered by azan clock 
 #ifdef OFFLINE_AZAN
 #include "music_clock.h"
 MusicClock wav;
 #else
-// azan will be streamed from the internet 
 #include "stream_azan.h"
+// azan will be streamed from the internet 
 StreamAzan wav;
 #endif 
+// TalkingClock talker; 
 
 ROM::Manager manager; 
 WiFiUDP ntpUDP;
@@ -52,14 +43,12 @@ SmartClock smart_clock(ntpUDP, "pool.ntp.org", clock_button, azan_clock);
 
 // remote deubg 
 RemoteDebug Debug;
-volatile bool initialization = false;
 
 // timer is useful for creating a software clock but it needs synchronization with the ntp clock  
 Timer<3, micros> timer;
 bool initialize_smart_clock(void *argument);
 bool update_smart_clock(void *argument);
-bool update_2s_clock(void *argument);
-bool repeat_azan_clock(void *argument);
+bool init_sound_check(void *argument);
 
 
 
@@ -91,37 +80,24 @@ void setup() {
 
   // intialize timer 
   timer.in(5e6, initialize_smart_clock);  
-  timer.in(3e7, repeat_azan_clock); 
+  timer.in(3e7, init_sound_check); 
 }
 
 void loop() {
   // run timer tick repeatedly to make timer operationalize 
   timer.tick();
 
-  // play azan when count down time is zero
   if(smart_clock.next_prayer() == 0)
   {
-    // cancel all pending tasks 
-    timer.cancel();
-    // this way wav file  does not repeat
-    smart_clock.sync_next_prayer_alarm();
-    Serial.println("[SmartClock] AZAN time, go to pray ...");
-    debugI("[SmartClock] AZAN time, go to pray ...");
-    wav.begin();
+    // update prayer alarm time 
+    auto now_prayer = azan_clock.getPrayer();
+    smart_clock.update_next_prayer_alarm();
+    wav.begin(now_prayer);
   }
   // DON'T change this two lines! azan wav won't works anywhere but inside the loop 
   // it needs to be initiated using a timer callback 
   if (wav.isRunning()) {
-    if (!wav.loop())
-    {
-      wav.stop();
-      // sync smart clock time 
-      smart_clock.sync_clock();
-      // make sure there is no pending timer task 
-      timer.cancel();
-      //resume smart clock timer 
-      timer.every(6e7, update_smart_clock);
-    }
+    if (!wav.loop()) wav.stop();
   }
   // Check for over the air update request and (if present) flash it
   ArduinoOTA.handle();
@@ -141,7 +117,6 @@ bool initialize_smart_clock(void *argument)
   smart_clock.reset_clock();
   timer.every(6e7, update_smart_clock);
   Serial.print("[Main::init] Timer pending Task "); Serial.println(timer.size());
-  // timer.every(2e6, update_2s_clock); // debuging purposes 
   return false;
 }
 
@@ -151,37 +126,26 @@ bool initialize_smart_clock(void *argument)
  */
 bool update_smart_clock(void *argument)
 {
-  debugI("[SmartClock v2] next prayer is coming in %d minutes", smart_clock.next_prayer());
   smart_clock.update_clock();
   return true;
 }
 
-bool update_2s_clock(void *argument)
-{
-  Serial.println("[Main::debug] updating 2 sec clock");
-  return true;
-}
 
 /**
  * @brief when the system get initialized for the first time, azan will be played as well \par 
  * it creates a timer task for repeating azan based on the next prayer time \par
  * azan wav needs to load every time 
  */
-bool repeat_azan_clock(void *argument)
+bool init_sound_check(void *argument)
 {
-  if(!initialization)
-  {
-    // test azan for 30s 
-    debugI("[Main::debug] azan will play for 30s");
-    wav.begin(); 
-    initialization = true; 
-    return true;  
-  }
-  // next time when it will come back stop azan 
-  wav.desync(); 
-  wav.forceStop();
-  wav.stop();
+    auto now_prayer = azan_clock.getPrayer();
+    smart_clock.update_next_prayer_alarm();
+    wav.begin(now_prayer);
+  // int hour = smart_clock.currentHour();
+  // int min = smart_clock.currentMinute(); 
   
-  debugI("[Main::debug] azan will stop repeating");
+  // talker.sayTime(hour, min);
+  // int remain = 60 - min; 
+  // timer.in(6e7 * remain, init_sound_check); 
   return false;
 }

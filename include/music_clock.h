@@ -22,14 +22,8 @@ public:
         audioLogger = &Serial;
         file_ = new AudioFileSourcePROGMEM( azan_wav, sizeof(azan_wav) );
         out_ = new AudioOutputI2SNoDAC();
-        out_->SetGain(4.0);
         AudioGeneratorWAV::begin(file_, out_);
         Serial.println("[MusicClock] Azan is loaded to play");
-    }
-
-    void forceStop()
-    {
-        running = false; 
     }
 private:
     AudioFileSourcePROGMEM *file_;

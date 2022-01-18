@@ -19,8 +19,17 @@ extern RemoteDebug Debug;
 
 #define NUM_DAILY_PRAYERS (5)
 
+enum PRAYER {
+    Fajr,
+    Dhuhr,
+    Asr,
+    Maghrib,
+    Isha
+};
+
 class AzanClock{
 public:
+   
     /**
      * @brief Construct a new Azan Clock object
      * Nodemcu has a limited computational resources. \par 
@@ -76,8 +85,8 @@ public:
         // get prayer method from the eeprom 
         DynamicJsonDocument doc(1024);
         
-        String url = "http://ipinfo.io/json";
-        fetch_content(url.c_str()); 
+        const char* url = "http://ipinfo.io/json";
+        fetch_content(url); 
         deserializeJson(doc, payload_);
         String country = doc["country"].as<String>();
         String city = doc["city"].as<String>();
@@ -121,17 +130,21 @@ public:
         {
             if(daily_prayer_times_[i] > currentTimeInMin)
             {
-                Serial.print("[AzanClock] Next prayer is ");
-                Serial.println(daily_prayer_names_[i]);
-                debugI("[AzanClock] Next prayer is %s", daily_prayer_names_[i].c_str());
+                switch (i)
+                {
+                    case 0: currentPrayer_ = Fajr; break;
+                    case 1: currentPrayer_ = Dhuhr; break;
+                    case 2: currentPrayer_ = Asr; break;
+                    case 3: currentPrayer_ = Maghrib; break;
+                    case 4: currentPrayer_ = Isha; break;
+                }
+                
                 return daily_prayer_times_[i] - currentTimeInMin; 
             }
         }
         // this happens after isha only 
         // after isha we need to wait until 12:00 AM to count time for the next day 
-        Serial.print("[AzanClock] Next prayer is ");
-        Serial.println(daily_prayer_names_[0]);
-        debugI("[AzanClock] Next prayer is Fajr");
+        currentPrayer_ = Fajr;
         return daily_prayer_times_[0] - currentTimeInMin + 24 * 60;
         
 
@@ -145,6 +158,10 @@ public:
     {
         return timestamp_;
     }
+    PRAYER getPrayer()
+    {
+        return currentPrayer_;
+    }
 
 private:
     int daily_prayer_times_[NUM_DAILY_PRAYERS];
@@ -153,5 +170,6 @@ private:
     String payload_; 
     String timezone_;
     long timestamp_;
+    PRAYER currentPrayer_; 
 
 };
