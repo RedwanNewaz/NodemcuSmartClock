@@ -5,6 +5,7 @@
 #include <arduino-timer.h>
 #include <ArduinoOTA.h>
 #include <RemoteDebug.h>
+#include "esp8266_mutex.h"
 
 #include "smart_clock.h"
 #include "rom_manager.h"
@@ -26,6 +27,8 @@
 // azan will be streamed from the internet 
 StreamAzan wav;
 MusicClock init_wav;
+mutex_t *mu = new mutex_t;
+
 // TalkingClock talker; 
 
 ROM::Manager manager; 
@@ -65,6 +68,7 @@ void setup() {
     delay(500);
     Serial.print(".");
   }
+  
  
   // start OTA for software update 
   ArduinoOTA.begin();
@@ -85,10 +89,13 @@ void loop() {
 
   if(smart_clock.next_prayer() == 0)
   {
+    CreateMutux(mu);
+    GetMutex(mu);
     // update prayer alarm time 
     auto now_prayer = azan_clock.getPrayer();
     smart_clock.update_next_prayer_alarm();
     wav.begin(now_prayer);
+    ReleaseMutex(mu);
   }
   // DON'T change this two lines! azan wav won't works anywhere but inside the loop 
   // it needs to be initiated using a timer callback 
