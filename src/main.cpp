@@ -9,7 +9,8 @@
 #include "smart_clock.h"
 #include "rom_manager.h"
 #include "azan_clock.h"
-// #include "talking_clock.h"
+#include "music_clock.h"
+#include "stream_azan.h"
 
 #define HOST_NAME "192.168.1.161"
 #define USE_ARDUINO_OTA true
@@ -21,15 +22,10 @@
 #define POWER_PIN   (D0)
 
 
-// music clock play azan sound when it is triggered by azan clock 
-#ifdef OFFLINE_AZAN
-#include "music_clock.h"
-MusicClock wav;
-#else
-#include "stream_azan.h"
+// music clock play offline azan sound during initialization  
 // azan will be streamed from the internet 
 StreamAzan wav;
-#endif 
+MusicClock init_wav;
 // TalkingClock talker; 
 
 ROM::Manager manager; 
@@ -80,7 +76,7 @@ void setup() {
 
   // intialize timer 
   timer.in(5e6, initialize_smart_clock);  
-  // timer.in(3e7, init_sound_check); 
+  timer.in(3e7, init_sound_check); 
 }
 
 void loop() {
@@ -98,6 +94,11 @@ void loop() {
   // it needs to be initiated using a timer callback 
   if (wav.isRunning()) {
     if (!wav.loop()) wav.stop();
+  }
+
+  // initial azan for testing 
+  if (init_wav.isRunning()) {
+    if (!init_wav.loop()) init_wav.stop();
   }
   // Check for over the air update request and (if present) flash it
   ArduinoOTA.handle();
@@ -138,14 +139,6 @@ bool update_smart_clock(void *argument)
  */
 bool init_sound_check(void *argument)
 {
-    auto now_prayer = azan_clock.getPrayer();
-    smart_clock.update_next_prayer_alarm();
-    wav.begin(now_prayer);
-  // int hour = smart_clock.currentHour();
-  // int min = smart_clock.currentMinute(); 
-  
-  // talker.sayTime(hour, min);
-  // int remain = 60 - min; 
-  // timer.in(6e7 * remain, init_sound_check); 
+  init_wav.begin();
   return false;
 }

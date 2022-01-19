@@ -3,7 +3,7 @@
 #include <AudioFileSourcePROGMEM.h>
 #include <AudioGeneratorWAV.h>
 #include <AudioOutputI2SNoDAC.h>
-#include "azan_sound.h"
+#include "azan_sound_short.h"
 
 class MusicClock: public AudioGeneratorWAV{
 public:
@@ -22,9 +22,11 @@ public:
         audioLogger = &Serial;
         file_ = new AudioFileSourcePROGMEM( azan_wav, sizeof(azan_wav) );
         out_ = new AudioOutputI2SNoDAC();
+        out_->SetGain(4.0);
         AudioGeneratorWAV::begin(file_, out_);
         Serial.println("[MusicClock] Azan is loaded to play");
     }
+
 private:
     AudioFileSourcePROGMEM *file_;
     AudioOutputI2SNoDAC *out_;

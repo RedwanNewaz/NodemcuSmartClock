@@ -28,15 +28,7 @@ public:
         AudioGeneratorMP3::begin(buffer_, out_);
     }
 
-    bool stop()
-    {
-       bool result = AudioGeneratorMP3::stop();
-       // clear memory 
-       delete file_; 
-       delete buffer_; 
-       delete out_;
-       return result;
-    }
+
     
         
 protected:
