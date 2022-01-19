@@ -121,6 +121,7 @@ public:
             daily_prayer_times_[count++] = hours * 60 + minutes; 
         } 
 
+        
     }
 
     int next_prayer_in_minutes(int currentTimeInMin)

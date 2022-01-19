@@ -80,7 +80,7 @@ void setup() {
 
   // intialize timer 
   timer.in(5e6, initialize_smart_clock);  
-  timer.in(3e7, init_sound_check); 
+  // timer.in(3e7, init_sound_check); 
 }
 
 void loop() {

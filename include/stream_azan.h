@@ -14,19 +14,30 @@ public:
     void begin(const PRAYER& prayer)
     {
         audioLogger = &Serial;
-        file = new AudioFileSourceICYStream();
-        file->RegisterMetadataCB(MDCallback, (void*)"ICY");
-        file->useHTTP10();
-        file->open(URL);
-        auto buff = new AudioFileSourceBuffer(file, STREAM_BUFFER_SIZE);
-        buff->RegisterStatusCB(StatusCallback, (void*)"buffer");
-        out = new AudioOutputI2SNoDAC();
+        file_ = new AudioFileSourceICYStream();
+        file_->RegisterMetadataCB(MDCallback, (void*)"ICY");
+        file_->useHTTP10();
+        file_->open(URL);
+        buffer_ = new AudioFileSourceBuffer(file, STREAM_BUFFER_SIZE);
+        buffer_->RegisterStatusCB(StatusCallback, (void*)"buffer");
+        out_ = new AudioOutputI2SNoDAC();
         //don't play loud azan during Fajr
         if(prayer != Fajr)
-            out->SetGain(4.0);
+            out_->SetGain(4.0);
         RegisterStatusCB(StatusCallback, (void*)"mp3");
-        AudioGeneratorMP3::begin(buff, out);
+        AudioGeneratorMP3::begin(buffer_, out_);
     }
+
+    bool stop()
+    {
+       bool result = AudioGeneratorMP3::stop();
+       // clear memory 
+       delete file_; 
+       delete buffer_; 
+       delete out_;
+       return result;
+    }
+    
         
 protected:
     // Called when a metadata event occurs (i.e. an ID3 tag, an ICY block, etc.
@@ -56,9 +67,8 @@ protected:
         Serial.flush();
     }
 private:
-    // AudioGeneratorMP3 *mp3;
-    AudioFileSourceICYStream *file;
-    // AudioFileSourceBuffer *buff;
-    AudioOutputI2SNoDAC *out;
+    AudioFileSourceICYStream *file_;
+    AudioFileSourceBuffer *buffer_;
+    AudioOutputI2SNoDAC *out_;
     const char *URL = "http://praytimes.org/audio/adhan/Sunni/Naghshbandi.mp3";
 };
