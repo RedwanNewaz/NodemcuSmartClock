@@ -5,7 +5,7 @@
 #include "AudioFileSourceBuffer.h"
 #include "AudioGeneratorMP3.h"
 #include "AudioOutputI2SNoDAC.h"
-// #include "azan_clock.h"
+#include "azan_clock.h"
 #define STREAM_BUFFER_SIZE (1024)
 
 
@@ -22,7 +22,7 @@ public:
         buff->RegisterStatusCB(StatusCallback, (void*)"buffer");
         out = new AudioOutputI2SNoDAC();
         //don't play loud azan during Fajr
-        if(prayer != PRAYER::Fajr)
+        if(prayer != Fajr)
             out->SetGain(4.0);
         RegisterStatusCB(StatusCallback, (void*)"mp3");
         AudioGeneratorMP3::begin(buff, out);
