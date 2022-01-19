@@ -5,12 +5,11 @@
 #include <arduino-timer.h>
 #include <ArduinoOTA.h>
 #include <RemoteDebug.h>
-#include "esp8266_mutex.h"
 
 #include "smart_clock.h"
 #include "rom_manager.h"
 #include "azan_clock.h"
-#include "music_clock.h"
+
 #include "stream_azan.h"
 
 #define HOST_NAME "192.168.1.161"
@@ -26,10 +25,7 @@
 // music clock play offline azan sound during initialization  
 // azan will be streamed from the internet 
 StreamAzan wav;
-MusicClock init_wav;
-mutex_t *mu = new mutex_t;
-
-// TalkingClock talker; 
+// MusicClock init_wav;
 
 ROM::Manager manager; 
 WiFiUDP ntpUDP;
@@ -89,24 +85,24 @@ void loop() {
 
   if(smart_clock.next_prayer() == 0)
   {
-    CreateMutux(mu);
-    GetMutex(mu);
     // update prayer alarm time 
     auto now_prayer = azan_clock.getPrayer();
     smart_clock.update_next_prayer_alarm();
     wav.begin(now_prayer);
-    ReleaseMutex(mu);
   }
   // DON'T change this two lines! azan wav won't works anywhere but inside the loop 
   // it needs to be initiated using a timer callback 
   if (wav.isRunning()) {
-    if (!wav.loop()) wav.stop();
+    if (!wav.loop())
+    {
+      wav.stop();  
+    }
   }
 
   // initial azan for testing 
-  if (init_wav.isRunning()) {
-    if (!init_wav.loop()) init_wav.stop();
-  }
+  // if (init_wav.isRunning()) {
+  //   if (!init_wav.loop()) init_wav.stop();
+  // }
   // Check for over the air update request and (if present) flash it
   ArduinoOTA.handle();
   // update remote debug handle 
@@ -146,6 +142,9 @@ bool update_smart_clock(void *argument)
  */
 bool init_sound_check(void *argument)
 {
-  init_wav.begin();
+  // update prayer alarm time 
+  auto now_prayer = azan_clock.getPrayer();
+  smart_clock.update_next_prayer_alarm();
+  wav.begin(now_prayer);
   return false;
 }
