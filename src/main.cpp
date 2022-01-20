@@ -10,6 +10,7 @@
 #include "rom_manager.h"
 #include "azan_clock.h"
 #include "music_clock.h"
+
 #include "stream_azan.h"
 
 #define HOST_NAME "192.168.1.161"
@@ -26,7 +27,6 @@
 // azan will be streamed from the internet 
 StreamAzan wav;
 MusicClock init_wav;
-// TalkingClock talker; 
 
 ROM::Manager manager; 
 WiFiUDP ntpUDP;
@@ -65,6 +65,7 @@ void setup() {
     delay(500);
     Serial.print(".");
   }
+  
  
   // start OTA for software update 
   ArduinoOTA.begin();
@@ -93,7 +94,10 @@ void loop() {
   // DON'T change this two lines! azan wav won't works anywhere but inside the loop 
   // it needs to be initiated using a timer callback 
   if (wav.isRunning()) {
-    if (!wav.loop()) wav.stop();
+    if (!wav.loop())
+    {
+      wav.stop();  
+    }
   }
 
   // initial azan for testing 
@@ -139,6 +143,7 @@ bool update_smart_clock(void *argument)
  */
 bool init_sound_check(void *argument)
 {
+  // update prayer alarm time 
   init_wav.begin();
   return false;
 }

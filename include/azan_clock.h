@@ -100,7 +100,7 @@ public:
       
         
         deserializeJson(doc, payload_);
-        timestamp_ = doc["date"]["timestamp"].as<long>();
+        timestamp_ = doc["data"]["date"]["timestamp"].as<long>();
         
         int avoid_indexes[2] = {1 , 4}; // these are sunrise and sunset times  
         int count  = 0;
