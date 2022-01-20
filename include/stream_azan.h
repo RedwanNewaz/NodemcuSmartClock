@@ -22,8 +22,10 @@ public:
         buffer_->RegisterStatusCB(StatusCallback, (void*)"buffer");
         out_ = new AudioOutputI2SNoDAC();
         //don't play loud azan during Fajr
-        // if(prayer == Fajr)
-        out_->SetGain(4.0);
+        if(prayer == Fajr)
+            out_->SetGain(1.0);
+        else
+            out_->SetGain(4.0);
         RegisterStatusCB(StatusCallback, (void*)"mp3");
         AudioGeneratorMP3::begin(buffer_, out_);
     }

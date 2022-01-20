@@ -9,6 +9,7 @@
 #include "smart_clock.h"
 #include "rom_manager.h"
 #include "azan_clock.h"
+#include "music_clock.h"
 
 #include "stream_azan.h"
 
@@ -25,7 +26,7 @@
 // music clock play offline azan sound during initialization  
 // azan will be streamed from the internet 
 StreamAzan wav;
-// MusicClock init_wav;
+MusicClock init_wav;
 
 ROM::Manager manager; 
 WiFiUDP ntpUDP;
@@ -100,9 +101,9 @@ void loop() {
   }
 
   // initial azan for testing 
-  // if (init_wav.isRunning()) {
-  //   if (!init_wav.loop()) init_wav.stop();
-  // }
+  if (init_wav.isRunning()) {
+    if (!init_wav.loop()) init_wav.stop();
+  }
   // Check for over the air update request and (if present) flash it
   ArduinoOTA.handle();
   // update remote debug handle 
@@ -143,8 +144,6 @@ bool update_smart_clock(void *argument)
 bool init_sound_check(void *argument)
 {
   // update prayer alarm time 
-  auto now_prayer = azan_clock.getPrayer();
-  smart_clock.update_next_prayer_alarm();
-  wav.begin(now_prayer);
+  init_wav.begin();
   return false;
 }
