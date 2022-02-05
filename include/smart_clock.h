@@ -8,7 +8,7 @@
 #define PRECISE_CLOCK
 
 extern RemoteDebug Debug;
-
+extern volatile enum PRAYER currentPrayer;
 
 
 class SmartClock: public NTPClient{
@@ -89,7 +89,7 @@ public:
         }
 
         // check prayer alarm when prayerAlarm is up
-        debugI("[SmartClock] next prayer coming in %d minutes", prayerAlarm_);
+        debugI("[SmartClock] next prayer %s coming in %d minutes", prayers_[(int) currentPrayer], prayerAlarm_);
 
         // every day sync clock at 12:01 AM
         if(currentHour_ == 0 && currentMinute_ == 1)
@@ -124,6 +124,7 @@ private:
     volatile int currentHour_, currentMinute_, currentSecond_; 
     volatile int currentDay_, currentMonth_, currentYear_; 
     volatile int prayerAlarm_; 
+    const String prayers_[5] = {"Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"};
 
 
 

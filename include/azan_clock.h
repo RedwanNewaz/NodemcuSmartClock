@@ -19,13 +19,13 @@ extern RemoteDebug Debug;
 
 #define NUM_DAILY_PRAYERS (5)
 
-enum PRAYER {
-    Fajr,
+volatile enum PRAYER {
+    Fajr = 0,
     Dhuhr,
     Asr,
     Maghrib,
     Isha
-};
+}currentPrayer;
 
 class AzanClock{
 public:
@@ -133,11 +133,11 @@ public:
             {
                 switch (i)
                 {
-                    case 0: currentPrayer_ = Fajr; break;
-                    case 1: currentPrayer_ = Dhuhr; break;
-                    case 2: currentPrayer_ = Asr; break;
-                    case 3: currentPrayer_ = Maghrib; break;
-                    case 4: currentPrayer_ = Isha; break;
+                    case 0: currentPrayer = Fajr; break;
+                    case 1: currentPrayer = Dhuhr; break;
+                    case 2: currentPrayer = Asr; break;
+                    case 3: currentPrayer = Maghrib; break;
+                    case 4: currentPrayer = Isha; break;
                 }
                 
                 return daily_prayer_times_[i] - currentTimeInMin; 
@@ -145,7 +145,7 @@ public:
         }
         // this happens after isha only 
         // after isha we need to wait until 12:00 AM to count time for the next day 
-        currentPrayer_ = Fajr;
+        currentPrayer = Fajr;
         return daily_prayer_times_[0] - currentTimeInMin + 24 * 60;
         
 
@@ -161,7 +161,7 @@ public:
     }
     PRAYER getPrayer()
     {
-        return currentPrayer_;
+        return currentPrayer;
     }
 
 private:
@@ -171,6 +171,6 @@ private:
     String payload_; 
     String timezone_;
     long timestamp_;
-    PRAYER currentPrayer_; 
+
 
 };

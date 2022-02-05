@@ -7,11 +7,11 @@
 #include "AudioOutputI2SNoDAC.h"
 #include "azan_clock.h"
 #define STREAM_BUFFER_SIZE (2048)
-
+extern volatile enum PRAYER currentPrayer;
 
 class StreamAzan: public AudioGeneratorMP3{
 public:
-    void begin(const PRAYER& prayer)
+    void begin()
     {
         audioLogger = &Serial;
         file_ = new AudioFileSourceICYStream();
@@ -22,7 +22,7 @@ public:
         buffer_->RegisterStatusCB(StatusCallback, (void*)"buffer");
         out_ = new AudioOutputI2SNoDAC();
         //don't play loud azan during Fajr
-        if(prayer == Fajr)
+        if(currentPrayer == Fajr)
             out_->SetGain(1.0);
         else
             out_->SetGain(4.0);
@@ -65,4 +65,5 @@ private:
     AudioFileSourceBuffer *buffer_;
     AudioOutputI2SNoDAC *out_;
     const char *URL = "http://praytimes.org/audio/adhan/Sunni/Naghshbandi.mp3";
+    
 };
