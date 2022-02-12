@@ -88,6 +88,7 @@ void loop() {
   {
     // update prayer alarm time 
     smart_clock.update_next_prayer_alarm();
+    // wav.begin();
     wav.begin();
   }
   // DON'T change this two lines! azan wav won't works anywhere but inside the loop 
@@ -143,6 +144,6 @@ bool update_smart_clock(void *argument)
 bool init_sound_check(void *argument)
 {
   // update prayer alarm time 
-  init_wav.begin();
+  wav.begin();
   return false;
 }

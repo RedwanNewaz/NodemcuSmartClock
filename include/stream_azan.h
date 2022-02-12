@@ -64,6 +64,6 @@ private:
     AudioFileSourceICYStream *file_;
     AudioFileSourceBuffer *buffer_;
     AudioOutputI2SNoDAC *out_;
-    const char *URL = "http://praytimes.org/audio/adhan/Sunni/Naghshbandi.mp3";
+    const char *URL = "http://192.168.1.186:8081/mp3/azan1.mp3";
     
 };
