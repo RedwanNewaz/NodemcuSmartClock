@@ -87,9 +87,9 @@ void loop() {
   if(smart_clock.next_prayer() == 0)
   {
     // update prayer alarm time 
-    auto now_prayer = azan_clock.getPrayer();
     smart_clock.update_next_prayer_alarm();
-    wav.begin(now_prayer);
+    // wav.begin();
+    wav.begin();
   }
   // DON'T change this two lines! azan wav won't works anywhere but inside the loop 
   // it needs to be initiated using a timer callback 
@@ -144,6 +144,6 @@ bool update_smart_clock(void *argument)
 bool init_sound_check(void *argument)
 {
   // update prayer alarm time 
-  init_wav.begin();
+  wav.begin();
   return false;
 }
