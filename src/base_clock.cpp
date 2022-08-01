@@ -38,21 +38,28 @@ void base_clock::updateTimer() {
 
     // compare current time with prayer time to play sound
     bool playingAzan = false;
+    int lastPrayerIndex = 0;
     for (int i = 0; i < NUM_PRAYERS; ++i) {
         if(compareTime(current_, prayers_[i]))
         {
             playSound(Azan);
             playingAzan = true;
         }
+
+        if( current_ > prayers_[i])
+            lastPrayerIndex = i;
     }
 
+    int nextPrayerIndex = (current_ < prayers_[0]) ? 0 : ++lastPrayerIndex % NUM_PRAYERS;
+    Time nextPrayerTime = prayers_[nextPrayerIndex];
+    String nextPrayer = PrayerNames[nextPrayerIndex];
     // reset clock at 24:00
     initialized_ = (current_.hour + current_.minute) != 0;
     if(!playingAzan)
-        notifyTime(current_);
+        notifyTime(current_, nextPrayerTime, nextPrayer);
 
 }
 
 bool base_clock::compareTime(const Time &A, const Time &B) {
-    return (A.hour == B.hour) && (A.minute == B.minute);
+    return A == B;
 }

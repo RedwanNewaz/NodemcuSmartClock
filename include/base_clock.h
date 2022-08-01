@@ -25,7 +25,7 @@ protected:
     virtual void setTime(int hour, int minute) = 0;
     virtual void playSound(const SoundType& sound) = 0;
     virtual Time fetchTime() = 0;
-    virtual void notifyTime(const Time& curr) = 0;
+    virtual void notifyTime(const Time& curr, const Time& prayerTime, const String& prayerName) = 0;
 
     bool compareTime(const Time& A, const Time& B);
     Time prayers_[NUM_PRAYERS];

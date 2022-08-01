@@ -32,6 +32,31 @@ struct Time{
         hour += hour_carry;
         return *this;
     }
+
+    bool operator == (const Time& other) const
+    {
+        return (this->hour == other.hour) && (this->minute == other.minute);
+    }
+
+    bool operator < (const Time& other) const 
+    {
+        auto currTimeInMin = hour * 60 + minute;
+        auto otherTimeInMin = other.hour * 60 + other.minute;
+        return currTimeInMin < otherTimeInMin; 
+    }
+
+      bool operator > (const Time& other) const 
+    {
+        auto currTimeInMin = hour * 60 + minute;
+        auto otherTimeInMin = other.hour * 60 + other.minute;
+        return currTimeInMin > otherTimeInMin; 
+    }
+
+    String toString() const
+    {
+        String format = String(hour) + ":" + String(minute);
+        return format;
+    }
 };
 
 enum PrayerType{

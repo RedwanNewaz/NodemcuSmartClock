@@ -69,13 +69,12 @@ void mqtt_client::mqttLoop()
     client_->loop();
 }
 
-void mqtt_client::publishTime(const Time& time)
+void mqtt_client::publishTime(const Time& time, const Time& prayerTime, const String& prayerName)
 {
-    String format = String(time.hour) + ":" + String(time.minute);
-    String alarmTime =  String(setAlarm_).c_str();
-    if(setAlarm_)
-        alarmTime  = String(alarm_.hour) + ":" + String(alarm_.minute);
-
-    client_->publish("/clock/time", format.c_str());
+    
+    String alarmTime = (setAlarm_) ? alarm_.toString() : String(setAlarm_);
+    client_->publish("/clock/time", time.toString().c_str());
     client_->publish("/clock/alarm", alarmTime.c_str());
+    client_->publish("/clock/prayer/time", prayerTime.toString().c_str());
+    client_->publish("/clock/prayer/name", prayerName.c_str());
 }

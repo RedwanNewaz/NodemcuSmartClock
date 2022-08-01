@@ -76,12 +76,12 @@ void ntp_prayer::repeat()
 }
 
 
-void ntp_prayer::notifyTime(const Time& curr)
+void ntp_prayer::notifyTime(const Time& curr, const Time& prayerTime, const String& prayerName)
 {
     if(compareTime(curr, alarm_))
     {
         playSound(Alarm);
         setAlarm_ = false;
     }
-    publishTime(curr);
+    publishTime(curr, prayerTime, prayerName);
 }

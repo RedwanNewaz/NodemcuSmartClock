@@ -13,7 +13,7 @@ namespace SMART_CLOCK{
              void callback(char* topic, byte* payload, unsigned int length);
              void reconnect();
              Time alarm_; 
-             void publishTime(const Time& time);
+             void publishTime(const Time& time, const Time& prayerTime, const String& prayerName);
              bool setAlarm_;
         private:
             WiFiClient wifiClient_;
