@@ -52,9 +52,17 @@ struct Time{
         return currTimeInMin > otherTimeInMin; 
     }
 
+    String paddedStr(int val) const 
+    {
+        String str = String(val);
+        if(str.length() == 1)
+            str = "0" + str;
+        return str; 
+    }
+
     String toString() const
     {
-        String format = String(hour) + ":" + String(minute);
+        String format = paddedStr(hour) + ":" + paddedStr(minute);
         return format;
     }
 };

@@ -34,6 +34,9 @@ public:
 
     void playSound(const SoundType& sound)
     {
+        if(current_.hour == 0) 
+            return;
+
         play_ = true;
         begin(sound);
     }
