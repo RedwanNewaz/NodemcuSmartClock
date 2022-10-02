@@ -48,7 +48,7 @@ Time ntp_prayer::fetchTime()
     String dateStr = doc["data"]["date"]["gregorian"]["date"].as<String>();
     Date date(dateStr);
     int offset = 0;
-    if(date > daylight_start && date < daylight_ends)
+    if(date >= daylight_start && date <= daylight_ends)
         offset = 1;
     
 

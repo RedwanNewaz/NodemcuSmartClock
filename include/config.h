@@ -26,7 +26,7 @@ struct Date{
     month = date.substring(3, 5).toInt();
   }
 
-  bool operator > (const Date& other) const 
+  bool operator >= (const Date& other) const 
   {
     if(month > other.month)
       return true;
@@ -35,7 +35,7 @@ struct Date{
     return false;
   }
 
-  bool operator < (const Date& other) const
+  bool operator <= (const Date& other) const
   {
     if(month < other.month)
       return true;
