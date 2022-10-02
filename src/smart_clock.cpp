@@ -43,8 +43,17 @@ Time ntp_prayer::fetchTime()
     auto payload = fetch_content(azanServerName);
     deserializeJson(doc, payload);
 
+    
+    // add daylight saving automatically 
+    String dateStr = doc["data"]["date"]["gregorian"]["date"].as<String>();
+    Date date(dateStr);
+    int offset = 0;
+    if(date > daylight_start && date < daylight_ends)
+        offset = 1;
+    
+
     long timestamp = doc["data"]["date"]["timestamp"].as<long>();
-    timestamp += timezone;
+    timestamp += (timezone + offset) * 3600;
 
     Time curr; 
     curr.hour = (timestamp / 3600) % 24;
@@ -78,7 +87,7 @@ void ntp_prayer::repeat()
 
 void ntp_prayer::notifyTime(const Time& curr, const Time& prayerTime, const String& prayerName)
 {
-    if(compareTime(curr, alarm_))
+    if(setAlarm_ && compareTime(curr, alarm_))
     {
         playSound(Alarm);
         setAlarm_ = false;
