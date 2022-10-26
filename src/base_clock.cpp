@@ -14,6 +14,8 @@ void base_clock::init() {
     // and prayer times from internet
     // updatePrayerTime(prayers_);
     current_ = fetchTime();
+
+    delay(1000);
     // debounce buttons for setting the current time
     setTime(current_.hour, current_.minute);
     
@@ -24,17 +26,29 @@ void base_clock::init() {
     // playSound(Alarm);
 }
 
-void base_clock::updateTimer() {
-    // sanity check
+void base_clock::updateClock()
+{
+
+   // sanity check
     if (!initialized_){
         init();
         return;
     }
-    // increment current time a minute
+  // increment current time a minute
     current_.minute += 1;
     current_.hour += (current_.minute >= 60 ? 1 : 0);
     current_.minute = current_.minute % 60;
     current_.hour = current_.hour % 24;
+
+    // reset clock at 24:00
+    initialized_ = (current_.hour + current_.minute) != 0;
+}
+
+
+void base_clock::updateTimer() {
+ 
+    if(!initialized_)
+        return;
 
     // compare current time with prayer time to play sound
     bool playingAzan = false;
@@ -53,8 +67,7 @@ void base_clock::updateTimer() {
     int nextPrayerIndex = (current_ < prayers_[0]) ? 0 : ++lastPrayerIndex % NUM_PRAYERS;
     Time nextPrayerTime = prayers_[nextPrayerIndex];
     String nextPrayer = PrayerNames[nextPrayerIndex];
-    // reset clock at 24:00
-    initialized_ = (current_.hour + current_.minute) != 0;
+  
     if(!playingAzan)
         notifyTime(current_, nextPrayerTime, nextPrayer);
 

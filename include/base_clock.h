@@ -19,6 +19,7 @@ public:
      * This will play sound for prayer time
      */
     void updateTimer();
+    void updateClock();
 
     virtual void musicLoop() = 0;
 protected:

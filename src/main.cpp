@@ -10,7 +10,12 @@ Timer<3, micros> timer;
 
 bool update_smart_clock(void *argument)
 {
-  prayer_clock.updateTimer();
+  int isUpdateClock = (int) argument;
+  if(isUpdateClock == 1)
+    prayer_clock.updateClock();
+  else
+    prayer_clock.updateTimer();
+  
   return true;
 }
 
@@ -32,7 +37,13 @@ void setup() {
   // start OTA for software update 
   ArduinoOTA.begin();
   prayer_clock.init();
-  timer.every(6e7, update_smart_clock);
+  int isUpdateClock = 1;
+  int isUpdateTimer = 0; 
+
+  // delay(5000);
+  
+  timer.every(6e7, update_smart_clock, (void *) isUpdateClock);
+  timer.every(1e7, update_smart_clock, (void *) isUpdateTimer);
 }
 
 void loop() {
