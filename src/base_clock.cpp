@@ -24,6 +24,7 @@ void base_clock::init() {
     // play sound as a confirmation of initialization
     // delay(1000);
     // playSound(Alarm);
+    playingAzan_ = false;
 }
 
 void base_clock::updateClock()
@@ -42,6 +43,7 @@ void base_clock::updateClock()
 
     // reset clock at 24:00
     initialized_ = (current_.hour + current_.minute) != 0;
+    playingAzan_ = false;
 }
 
 
@@ -51,13 +53,13 @@ void base_clock::updateTimer() {
         return;
 
     // compare current time with prayer time to play sound
-    bool playingAzan = false;
+    
     int lastPrayerIndex = 0;
     for (int i = 0; i < NUM_PRAYERS; ++i) {
-        if(compareTime(current_, prayers_[i]))
+        if(compareTime(current_, prayers_[i]) && !playingAzan_)
         {
             playSound(Azan);
-            playingAzan = true;
+            playingAzan_ = true;
         }
 
         if( current_ > prayers_[i])
@@ -68,8 +70,7 @@ void base_clock::updateTimer() {
     Time nextPrayerTime = prayers_[nextPrayerIndex];
     String nextPrayer = PrayerNames[nextPrayerIndex];
   
-    if(!playingAzan)
-        notifyTime(current_, nextPrayerTime, nextPrayer);
+    notifyTime(current_, nextPrayerTime, nextPrayer);
 
 }
 

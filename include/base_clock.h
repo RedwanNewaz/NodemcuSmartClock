@@ -22,6 +22,7 @@ public:
     void updateClock();
 
     virtual void musicLoop() = 0;
+    
 protected:
     virtual void setTime(int hour, int minute) = 0;
     virtual void playSound(const SoundType& sound) = 0;
@@ -31,8 +32,10 @@ protected:
     bool compareTime(const Time& A, const Time& B);
     Time prayers_[NUM_PRAYERS];
     Time current_;
+    bool playingAzan_;
 private:
     bool initialized_;
+    
 
 };
 

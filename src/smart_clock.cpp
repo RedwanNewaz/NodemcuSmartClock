@@ -87,7 +87,7 @@ void ntp_prayer::repeat()
 
 void ntp_prayer::notifyTime(const Time& curr, const Time& prayerTime, const String& prayerName)
 {
-    if(setAlarm_ && compareTime(curr, alarm_))
+    if(setAlarm_ && compareTime(curr, alarm_) && !playingAzan_)
     {
         playSound(Alarm);
         setAlarm_ = false;
