@@ -5,6 +5,8 @@
 #include <QString>
 #include <qqml.h>
 #include <memory>
+#include <QSettings>
+
 class backend;
 typedef std::shared_ptr<backend> BackendPtr;
 
@@ -102,6 +104,8 @@ public slots:
       int m_minuteClock;
       int m_hourAlarm;
       int m_minuteAlarm;
+
+      std::unique_ptr<QSettings> m_settings;
 
 };
 

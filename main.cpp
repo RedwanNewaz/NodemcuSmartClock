@@ -12,9 +12,9 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
     auto back_end = std::make_shared<backend>();
 
-    const QHostInfo ipAddr = QHostInfo::fromName("192.168.1.1");
+    const QHostInfo ipAddr = QHostInfo::fromName(back_end->ipAddr());
     const QHostAddress EXAMPLE_HOST = ipAddr.addresses()[0];
-    const quint16 EXAMPLE_PORT = 1883;
+    const quint16 EXAMPLE_PORT = back_end->portAddr().toUInt();
     const QString EXAMPLE_TOPIC = "/clock/time";
     QStringList topics;
     topics << "/clock/time" << "/clock/alarm" << "/clock/prayer/time" << "/clock/prayer/name";

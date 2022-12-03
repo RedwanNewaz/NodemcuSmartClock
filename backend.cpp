@@ -3,8 +3,11 @@
 
 backend::backend(QObject *parent) : QObject(parent)
 {
-    m_azanTime = "13:40";
-    m_azanName = "Dhur";
+    m_settings = std::make_unique<QSettings>("AzanClock", "mqtt");
+
+
+    m_azanTime = "05:40";
+    m_azanName = "Fajr";
     m_ipAddr = "192.168.1.1";
     m_portAddr = "1883";
 
@@ -15,6 +18,15 @@ backend::backend(QObject *parent) : QObject(parent)
     m_minuteClock = 54;
     m_hourAlarm = 13;
     m_minuteAlarm = 12;
+
+    // check whether user changed mqtt setting
+    const auto mqtt_user_ip = m_settings->value("ipAddr", QString()).toString();
+    const auto mqtt_user_port = m_settings->value("portAddr", QString()).toString();
+    if(!mqtt_user_ip.isEmpty())
+        m_ipAddr = mqtt_user_ip;
+    if(!mqtt_user_port.isEmpty())
+        m_portAddr = mqtt_user_port;
+
 }
 
 QString backend::azanTime()
@@ -48,6 +60,7 @@ void backend::setIPAddr(const QString &value)
 {
      m_ipAddr = value;
      qDebug() << "[IP ADDRESS]: " << value;
+     m_settings->setValue("ipAddr", value);
      emit setipAddrChanged();
 }
 
@@ -59,6 +72,7 @@ QString backend::portAddr()
 void backend::setPortAddr(const QString &value)
 {
      m_portAddr = value;
+     m_settings->setValue("portAddr", value);
      emit setPortAddrChanged();
 }
 
