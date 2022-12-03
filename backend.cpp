@@ -27,6 +27,17 @@ backend::backend(QObject *parent) : QObject(parent)
     if(!mqtt_user_port.isEmpty())
         m_portAddr = mqtt_user_port;
 
+    // update clock
+//    const auto azanTime = m_settings->value("azanTime", int()).toInt();
+//    const auto azanName = m_settings->value("azanName", QString()).toString();
+//    const auto hourClock = m_settings->value("hourClock", int()).toInt();
+//    const auto minuteClock = m_settings->value("minuteClock", int()).toInt();
+
+    m_azanTime = m_settings->value("azanTime", QString()).toString();
+    m_azanName = m_settings->value("azanName", QString()).toString();
+    m_hourClock = m_settings->value("hourClock", int()).toInt();
+    m_minuteClock = m_settings->value("minuteClock", int()).toInt();
+
 }
 
 QString backend::azanTime()
@@ -38,6 +49,9 @@ void backend::setAzanTime(const QString &value)
 {
     m_azanTime = value;
     emit setAzanTimeChanged();
+
+    // remember this value
+    m_settings->setValue("azanTime", value);
 }
 
 QString backend::azanName()
@@ -49,6 +63,9 @@ void backend::setAzanName(const QString &value)
 {
     m_azanName = value;
     emit setAzanNameChanged();
+
+    // remember this value
+    m_settings->setValue("azanName", value);
 }
 
 QString backend::ipAddr()
@@ -119,6 +136,9 @@ void backend::setHourClock(const int &value)
 {
     m_hourClock = value;
     emit setHourClockChanged();
+
+    // remember this value
+    m_settings->setValue("hourClock", value);
 }
 
 int backend::minuteClock()
@@ -130,6 +150,10 @@ void backend::setMinuteClock(const int &value)
 {
     m_minuteClock = value;
     emit setMinuteClockChanged();
+
+    // remember this value
+    m_settings->setValue("minuteClock", value);
+
 }
 
 int backend::hourAlarm()
@@ -141,6 +165,8 @@ void backend::setHourAlarm(const int &value)
 {
     m_hourAlarm = value;
     emit setHourAlarmChanged();
+
+
 }
 
 int backend::minuteAlarm()
