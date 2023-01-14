@@ -15,6 +15,6 @@ namespace SMART_CLOCK{
         Time fetchTime();
         String fetch_content(const char *url);
         void notifyTime(const Time& curr, const Time& prayerTime, const String& prayerName);
-        
+        void reset(int type) override;
     };
 }

@@ -35,14 +35,11 @@ void base_clock::updateClock()
         init();
         return;
     }
-  // increment current time a minute
-    current_.minute += 1;
-    current_.hour += (current_.minute >= 60 ? 1 : 0);
-    current_.minute = current_.minute % 60;
-    current_.hour = current_.hour % 24;
+    // increment current time a minute
+    current_.incrMinute();
 
     // reset clock at 24:00
-    initialized_ = (current_.hour + current_.minute) != 0;
+    initialized_ = !current_.isMidNight();
     playingAzan_ = false;
 }
 

@@ -10,6 +10,7 @@ namespace SMART_CLOCK{
             void mqttLoop();
             void init();
         protected:
+             virtual void reset(int type) = 0;
              void callback(char* topic, byte* payload, unsigned int length);
              void reconnect();
              Time alarm_; 

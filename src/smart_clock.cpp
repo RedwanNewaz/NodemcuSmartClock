@@ -55,10 +55,8 @@ Time ntp_prayer::fetchTime()
     long timestamp = doc["data"]["date"]["timestamp"].as<long>();
     timestamp += (timezone + offset) * 3600;
 
-    Time curr; 
-    curr.hour = (timestamp / 3600) % 24;
-    curr.minute = (timestamp % 3600) / 60;
-    curr.second = timestamp % 60; 
+    Time curr(timestamp); 
+ 
 
     int i = 0;
     for(auto prayer: PrayerNames)
@@ -66,7 +64,7 @@ Time ntp_prayer::fetchTime()
         String data = doc["data"]["timings"][prayer].as<String>();
         int hours = data.substring(0,2).toInt();
         int minutes = data.substring(3,5).toInt();
-        Time time{hours, minutes, 0};
+        Time time(hours, minutes, 0);
         prayers_[i++] = time;
     }
     return curr.offset();
@@ -76,6 +74,14 @@ void ntp_prayer::init()
 {
     base_clock::init();
     mqtt_client::init();
+}
+
+void ntp_prayer::reset(int type)
+{
+    if(type == 1)
+        setTime(current_.hour, current_.minute);
+    else
+        base_clock::init();
 }
 
 void ntp_prayer::repeat()

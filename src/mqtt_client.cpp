@@ -18,6 +18,7 @@ void mqtt_client::init()
 
 void mqtt_client::callback(char* topic, byte* payload, unsigned int length)
 {
+
     Serial.print("Message arrived [");
     Serial.print(topic);
     Serial.print("] ");
@@ -33,7 +34,11 @@ void mqtt_client::callback(char* topic, byte* payload, unsigned int length)
     else if(String(topic).equals(minuteTopic))
       alarm_.minute = data.toInt();
     else if(String(topic).equals(startTopic))
-        setAlarm_ = !setAlarm_;
+      setAlarm_ = !setAlarm_;
+    else if(String(topic).equals(resetTopic))
+      reset(data.toInt());
+     
+ 
 }
 
 void mqtt_client::reconnect()
@@ -48,6 +53,7 @@ void mqtt_client::reconnect()
         client_->subscribe(hourTopic);
         client_->subscribe(minuteTopic);
         client_->subscribe(startTopic);
+        client_->subscribe(resetTopic);
       } 
       else 
       {
