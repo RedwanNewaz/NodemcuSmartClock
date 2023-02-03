@@ -15,6 +15,7 @@ namespace SMART_CLOCK{
             /// use reset(1) when internet (mqtt) time is accurate but clock display wrong time
             /// when mqtt time is also wrong then use any number to reset the base clock and button clock
              virtual void reset(int type) = 0;
+             virtual void presetAlarm(int minute) = 0;
              void callback(char* topic, byte* payload, unsigned int length);
              void reconnect();
              Time alarm_; 

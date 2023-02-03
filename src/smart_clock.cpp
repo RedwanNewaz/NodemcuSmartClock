@@ -100,3 +100,11 @@ void ntp_prayer::notifyTime(const Time& curr, const Time& prayerTime, const Stri
     }
     publishTime(curr, prayerTime, prayerName);
 }
+
+void ntp_prayer::presetAlarm(int minute)   
+{
+      // implement preset alarm
+      int value = minute; 
+      alarm_ = current_.addMinute(value);
+      setAlarm_ = true;
+}

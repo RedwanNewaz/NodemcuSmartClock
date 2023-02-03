@@ -38,12 +38,8 @@ void mqtt_client::callback(char* topic, byte* payload, unsigned int length)
     else if(String(topic).equals(resetTopic))
       reset(data.toInt());
     else if(String(topic).equals(presetTopic))
-    {
-      // implement preset alarm
-      int value = data.toInt(); 
-      alarm_ = alarm_.addMinute(value);
-      setAlarm_ = true;
-    }
+      presetAlarm(data.toInt());
+ 
      
  
 }
