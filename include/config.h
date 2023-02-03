@@ -36,10 +36,18 @@ static const long timezone = -6; // GMT - 6
 static const char* azanServerName  = "http://api.aladhan.com/v1/timingsByCity?city=NewOrleans&country=US&method=2";
 static const float soundGain = 4.0;
 
+// subscribe topic 
 static const char* hourTopic = "/clock/alarm/set/hour";
 static const char* minuteTopic = "/clock/alarm/set/minute";
 static const char* startTopic = "/clock/alarm/start";
 static const char* resetTopic = "/clock/reset";
+static const char* presetTopic = "/clock/alarm/preset";
+
+//publish topic 
+static const char* pubTime = "/clock/time";
+static const char* pubAlarm = "/clock/alarm";
+static const char* pubPrayerTime = "/clock/prayer/time";
+static const char* pubPrayerName = "/clock/prayer/name";
 
 
 // start Sunday, March 13

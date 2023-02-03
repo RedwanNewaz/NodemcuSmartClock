@@ -56,6 +56,15 @@ struct Time{
       this->second = second;
     }
 
+    Time addMinute(int minute)
+    {
+      int resMinute = minute + this->minute;  
+      int hour_carry = resMinute / 60;
+      resMinute = resMinute % 60; 
+      int resHour = (this->hour + hour_carry) % 24; 
+      return Time(resHour, resMinute, this->second);
+    }
+
     Time offset()
     {
          //button clock sometimes take long time to set up the clock 

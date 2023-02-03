@@ -37,6 +37,13 @@ void mqtt_client::callback(char* topic, byte* payload, unsigned int length)
       setAlarm_ = !setAlarm_;
     else if(String(topic).equals(resetTopic))
       reset(data.toInt());
+    else if(String(topic).equals(presetTopic))
+    {
+      // implement preset alarm
+      int value = data.toInt(); 
+      alarm_ = alarm_.addMinute(value);
+      setAlarm_ = true;
+    }
      
  
 }
@@ -54,6 +61,7 @@ void mqtt_client::reconnect()
         client_->subscribe(minuteTopic);
         client_->subscribe(startTopic);
         client_->subscribe(resetTopic);
+        client_->subscribe(presetTopic);
       } 
       else 
       {
@@ -79,8 +87,8 @@ void mqtt_client::publishTime(const Time& time, const Time& prayerTime, const St
 {
     
     String alarmTime = (setAlarm_) ? alarm_.toString() : String(setAlarm_);
-    client_->publish("/clock/time", time.toString().c_str());
-    client_->publish("/clock/alarm", alarmTime.c_str());
-    client_->publish("/clock/prayer/time", prayerTime.toString().c_str());
-    client_->publish("/clock/prayer/name", prayerName.c_str());
+    client_->publish(pubTime, time.toString().c_str());
+    client_->publish(pubAlarm, alarmTime.c_str());
+    client_->publish(pubPrayerTime, prayerTime.toString().c_str());
+    client_->publish(pubPrayerName, prayerName.c_str());
 }
