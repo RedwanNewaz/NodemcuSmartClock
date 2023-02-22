@@ -1,0 +1,24 @@
+{
+    "data":
+    {
+        "date":
+        {
+            "gregorian":
+            {
+                "date": "02/21/2023"
+            }, 
+            "timestamp":
+            {
+
+            }
+        },
+        "timings":
+        {
+            "Fajr": "05:29",
+            "Dhuhr": "12:14", 
+            "Asr": "15:28", 
+            "Maghrib": "17:53", 
+            "Isha": "19:00"
+        }
+    }
+}
