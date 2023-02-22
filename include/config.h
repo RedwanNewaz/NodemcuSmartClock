@@ -33,7 +33,7 @@ static const String PrayerNames[NUM_PRAYERS] = {"Fajr", "Dhuhr", "Asr", "Maghrib
 static const long timezone = -6; // GMT - 6
 // static const char* net = "<your ssn>";
 // static const char* password = "<your pass>";
-static const char* azanServerName  = "http://api.aladhan.com/v1/timingsByCity?city=NewOrleans&country=US&method=2";
+static const char* azanServerName  = "https://api.aladhan.com/v1/calendarByCity/2023/2?city=New%20Orleans&country=US";
 static const float soundGain = 4.0;
 
 // subscribe topic 
