@@ -108,3 +108,39 @@ void ntp_prayer::presetAlarm(int minute)
       alarm_ = current_.addMinute(value);
       setAlarm_ = true;
 }
+
+void ntp_prayer::decodeDateTime(const char *data, int *timestamp)
+{
+    // data = "21.02.2023 17:52";
+    // skip unnecessary characters and convert chars to integers
+    int i, j;
+    int buffer[dateBufferSize];
+    
+    i = j = 0;
+    while(j < dateBufferSize)
+    {
+        int value = data[i] - '0';
+        // integer digit cannot be more than 9
+        if(value >=0 && value <10)
+        {
+            buffer[j++] = value;
+        }
+        i++; 
+    }
+    
+    // 210220231752
+
+    timestamp[0] = buffer[0] * 10 + buffer[1]; // day
+    timestamp[1] = buffer[2] * 10 + buffer[3]; // month
+    timestamp[2] = buffer[4] * 1000 + buffer[5] * 100 + buffer[6] * 10 + buffer[7]; // year
+    timestamp[3] = buffer[8] * 10 + buffer[9]; // hour
+    timestamp[4] = buffer[10] * 10 + buffer[11]; // minute
+}
+
+void ntp_prayer::setClockButton(const char *data)
+{
+    int intTime[timestampSize];
+    decodeDateTime(data, intTime);
+    current_ = Time(intTime[3], intTime[4], 0);
+    setTime(intTime[3], intTime[4]);
+}

@@ -39,6 +39,8 @@ void mqtt_client::callback(char* topic, byte* payload, unsigned int length)
       reset(data.toInt());
     else if(String(topic).equals(presetTopic))
       presetAlarm(data.toInt());
+    else if(String(topic).equals(syncTopic))
+      setClockButton(data.c_str());
  
      
  
@@ -58,6 +60,7 @@ void mqtt_client::reconnect()
         client_->subscribe(startTopic);
         client_->subscribe(resetTopic);
         client_->subscribe(presetTopic);
+        client_->subscribe(syncTopic);
       } 
       else 
       {

@@ -42,6 +42,7 @@ static const char* minuteTopic = "/clock/alarm/set/minute";
 static const char* startTopic = "/clock/alarm/start";
 static const char* resetTopic = "/clock/reset";
 static const char* presetTopic = "/clock/alarm/preset";
+static const char* syncTopic = "/clock/time/sync";
 
 //publish topic 
 static const char* pubTime = "/clock/time";
