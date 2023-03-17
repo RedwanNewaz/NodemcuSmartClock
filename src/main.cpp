@@ -3,7 +3,7 @@
 #include <arduino-timer.h>
 #include <ArduinoOTA.h>
 #include "clock/ClockNetwork.h"
-#include "credential.h"
+
 #ifdef ESP32
 #include <WiFi.h>
 #else
@@ -12,7 +12,8 @@
 
 #define WIFI_TIMEOUT_MS 2000
 
-
+const char *net = "SuzyRedwanWiFi";
+const char *password = "s1210060JAIST;";
 
 MqttInterface *interface; 
 Timer<4, micros> timer;
@@ -84,7 +85,7 @@ protected:
 void setup() {
   // put your setup code here, to run once:
   // set RX pullup to avoid clicking sound 
-
+  pinMode(D9, INPUT_PULLUP);
 
   ArduinoOTA.begin();
   myclock.init();
