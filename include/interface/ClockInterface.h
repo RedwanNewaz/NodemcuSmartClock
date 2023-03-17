@@ -31,6 +31,8 @@ public:
     setTime(_currentTime.getHour(), _currentTime.getMinute());
   }
 
+
+
   void reset(const ClockTime &time) {
     _currentTime = time;
     Serial.printf("[+] resetting time = %02d:%02d \n", _currentTime.getHour(), _currentTime.getMinute());
@@ -46,6 +48,14 @@ public:
   virtual void publishTime(const ClockTime& time, const ClockTime& prayerTime, const ClockTime& alarmTime, const char* prayerName) = 0;
 
   //--------------------------------------------------------------
+
+  bool init_sound()
+  {
+    playSound(Boot);
+    _stateMachine.setMusic(true);
+    // don't repeat this timer 
+    return false;
+  }
 
   bool update_every_minute(void *param) {
     // update internal timer

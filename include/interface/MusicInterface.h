@@ -2,7 +2,7 @@
 #include "ClockInterface.h"
 #include "../data/azan_sound.hpp"
 #include "../data/bell_sound.hpp"
-
+#include "../data/init_sound.hpp"
 #include "AudioFileSourcePROGMEM.h"
 #include "AudioGeneratorWAV.h"
 #include "AudioOutputI2SNoDAC.h"
@@ -27,11 +27,13 @@ public:
     void begin(const SoundType& sound)
     {        
         audioLogger = &Serial;
-        file_ = (sound == Azan) ? new AudioFileSourcePROGMEM( azan_wav, sizeof(azan_wav) ) : new AudioFileSourcePROGMEM( bell_wav, sizeof(bell_wav) );
+        // file_ = (sound == Azan) ? new AudioFileSourcePROGMEM( azan_wav, sizeof(azan_wav) ) : new AudioFileSourcePROGMEM( bell_wav, sizeof(bell_wav) );
         if (sound == Azan)
             file_ = new AudioFileSourcePROGMEM( azan_wav, sizeof(azan_wav) ) ;
-        else
+        else if(sound == Alarm)
             file_ = new AudioFileSourcePROGMEM( bell_wav, sizeof(bell_wav) ) ;
+        else if(sound == Boot)
+            file_ = new AudioFileSourcePROGMEM( init_wav, sizeof(init_wav) ) ;
         out_ = new AudioOutputI2SNoDAC();
         out_->SetGain(soundGain);
         AudioGeneratorWAV::begin(file_, out_);

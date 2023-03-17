@@ -15,7 +15,7 @@
 
 
 MqttInterface *interface; 
-Timer<3, micros> timer;
+Timer<4, micros> timer;
 
 
 class AzanClock{
@@ -44,10 +44,12 @@ public:
         interface = new MqttInterface(ClockTime(timestamp));
         interface->init(); 
         // delay(1000);
-        int isUpdateClock = 1;
-        int isUpdateTimer = 0;  
+        int isUpdateClock = 0;
+        int isUpdateTimer = 1; 
+        int isinitSound = 2;  
         timer.every(6e7, update_smart_clock, (void *) isUpdateClock);
         timer.every(1e6, update_smart_clock, (void *) isUpdateTimer); 
+        timer.every(15e5, update_smart_clock, (void *) isinitSound); 
     }
     static void tick()
     {
@@ -59,11 +61,17 @@ protected:
   static bool update_smart_clock(void *argument)
   {
     int isUpdateClock = (int) argument;
-    if(isUpdateClock)
+    bool repeat = true; 
+    switch(isUpdateClock)
+    {
+      case 0:
         return interface->update_every_minute(argument);
-    else
+      case 1:
         return interface->update_frequently(argument);
-    return true;
+      case 2:
+        return interface->init_sound();
+    }
+    return repeat;
   }
 }myclock;
 
