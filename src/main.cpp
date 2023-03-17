@@ -16,7 +16,7 @@ const char *net = "SuzyRedwanWiFi";
 const char *password = "s1210060JAIST;";
 
 MqttInterface *interface; 
-Timer<4, micros> timer;
+Timer<3, micros> timer;
 
 
 class AzanClock{
@@ -45,12 +45,10 @@ public:
         interface = new MqttInterface(ClockTime(timestamp));
         interface->init(); 
         // delay(1000);
-        int isUpdateClock = 0;
-        int isUpdateTimer = 1; 
-        int isinitSound = 2;  
+        int isUpdateClock = 1;
+        int isUpdateTimer = 0;  
         timer.every(6e7, update_smart_clock, (void *) isUpdateClock);
         timer.every(1e6, update_smart_clock, (void *) isUpdateTimer); 
-        timer.every(15e5, update_smart_clock, (void *) isinitSound); 
     }
     static void tick()
     {
@@ -62,17 +60,11 @@ protected:
   static bool update_smart_clock(void *argument)
   {
     int isUpdateClock = (int) argument;
-    bool repeat = true; 
-    switch(isUpdateClock)
-    {
-      case 0:
+    if(isUpdateClock)
         return interface->update_every_minute(argument);
-      case 1:
+    else
         return interface->update_frequently(argument);
-      case 2:
-        return interface->init_sound();
-    }
-    return repeat;
+    return true;
   }
 }myclock;
 

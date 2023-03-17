@@ -24,8 +24,7 @@ enum PrayerType{
 
 enum SoundType{
     Azan,
-    Alarm, 
-    Boot
+    Alarm
 };
 
 static const long timezone = -6; // GMT - 6
