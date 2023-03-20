@@ -28,7 +28,7 @@ public:
      bool azanActive = false; 
     _nextPrayer = nextPrayerIndex(azanActive);
     _currentTime = _currentTime.offset();
-    setTime(_currentTime.getHour(), _currentTime.getMinute());
+    // setTime(_currentTime.getHour(), _currentTime.getMinute());
   }
 
   void reset(const ClockTime &time) {
@@ -38,7 +38,7 @@ public:
      bool azanActive = false; 
     _nextPrayer = nextPrayerIndex(azanActive);
     _currentTime = _currentTime.offset();
-    setTime(_currentTime.getHour(), _currentTime.getMinute());
+    // setTime(_currentTime.getHour(), _currentTime.getMinute());
   }
 
   //----------------virtual functions----------------------------
@@ -62,7 +62,7 @@ public:
       Serial.printf("playing azan sound \n");
       playSound(Azan);
 
-    } else if (_stateMachine.playAlarm()) {
+    } else if (_currentTime == _alarmTime && _stateMachine.playAlarm() ) {
       // activate alarm sound
       Serial.printf("playing alarm sound \n");
       playSound(Alarm);

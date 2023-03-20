@@ -14,19 +14,19 @@ private:
 public:
     MqttInterface()
     {
-
+        alarm_time_[0] = alarm_time_[1] = 0;
     }
 
     MqttInterface(const ClockTime &time):MusicInterface(time)
     {
-
+        alarm_time_[0] = alarm_time_[1] = 0;
     }
 
     void init()
     {
         client_ = new PubSubClient(wifiClient_);
         server_ = new IPAddress(MQTT_SERVER_ADDRESS[0], MQTT_SERVER_ADDRESS[1], MQTT_SERVER_ADDRESS[2], MQTT_SERVER_ADDRESS[3]);
-        alarm_time_[0] = alarm_time_[1] = 0;
+        
         client_->setServer(*server_, 1883);
         client_->setCallback([=](char* topic, byte* payload, unsigned int length){this->callback(topic, payload, length);});
     }
@@ -39,7 +39,7 @@ public:
         Serial.print("] ");
         String data = "";
         for (int i = 0; i < length; i++) {
-        data += (char)payload[i];
+            data += (char)payload[i];
         }
         Serial.println(data);
 

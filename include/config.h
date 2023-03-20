@@ -31,7 +31,7 @@ static const long timezone = -6; // GMT - 6
 // static const char* net = "<your ssn>";
 // static const char* password = "<your pass>";
 // "http://api.aladhan.com/v1/timingsByCity?city=New%20Orleans&country=US&method=2"
-static const char* azanServerName  = "https://bit.ly/41gN5gY";
+// static const char* azanServerName  = "https://bit.ly/41gN5gY";
 static const float soundGain = 4.0;
 
 // subscribe topic 

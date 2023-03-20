@@ -2,7 +2,7 @@
 #include "interface/MqttInterface.h"
 #include <arduino-timer.h>
 #include <ArduinoOTA.h>
-#include "clock/ClockNetwork.h"
+
 #include "credential.h"
 #ifdef ESP32
 #include <WiFi.h>
@@ -18,6 +18,7 @@ Timer<3, micros> timer;
 
 
 class AzanClock{
+
 public:
     static void init()
     {
@@ -35,9 +36,6 @@ public:
         Serial.printf("\n [!!] Connected to = %s \n", net);
         delay(1000);
 
-
-        // netClock = new ClockNetwork(ntpUDP, "pool.ntp.org");
-        // const char * timestamp = netClock->fetchTime().c_str();
         
         const char * timestamp =  "16.03.2023 19:13";
         interface = new MqttInterface(ClockTime(timestamp));
@@ -75,7 +73,7 @@ protected:
 void setup() {
   // put your setup code here, to run once:
   // set RX pullup to avoid clicking sound 
-  pinMode(D9, INPUT_PULLUP);
+  // pinMode(D9, INPUT_PULLUP);
 
   ArduinoOTA.begin();
   myclock.init();
